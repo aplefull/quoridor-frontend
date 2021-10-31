@@ -70,6 +70,11 @@ export const isCurrentPlayerTurn = (turn: Player, currentPlayer: Player) => {
   return turn === currentPlayer;
 };
 
+export const doesPlayerHaveWalls = (player: Player, playerOneWalls: number, playerTwoWalls: number) => {
+  if (player === 'One') return playerOneWalls > 0;
+  else return playerTwoWalls > 0;
+};
+
 export const getWallCoords = (desirablePos: Position, wallType: string) => {
   if (wallType === ELEMENTS.VERTICAL_WALL) {
     return desirablePos.row === PLAYFIELD_SIZE
@@ -97,4 +102,16 @@ export const getWallCoords = (desirablePos: Position, wallType: string) => {
         ];
   }
   return [];
+};
+
+export const getFromLocalStorage = (key: string) => {
+  return localStorage.getItem(key);
+};
+
+export const setToLocalStorage = (key: string, value: string) => {
+  return localStorage.setItem(key, value);
+};
+
+export const deleteFromLocalStorage = (key: string) => {
+  return localStorage.removeItem(key);
 };

@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectPlayer, setData, setInitialData, setRoomId, startGame } from '../redux/slices/playfiedSlice';
+import { selectPlayer, setRoomId } from '../redux/slices/playfiedSlice';
 import { v4, validate } from 'uuid';
 import { createNewRoom, joinRoom } from '../redux/slices/playfiedSlice';
 import { RootState } from '../redux/store';
-import { socket } from '../utils/api';
 import { useHistory } from 'react-router-dom';
+import { getFromLocalStorage, setToLocalStorage } from '../utils/utils';
 
 const Menu = () => {
   const [state, setState] = useState('initial');
@@ -30,6 +30,7 @@ const Menu = () => {
       dispatch(selectPlayer(value));
       setState('waiting');
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -43,13 +44,18 @@ const Menu = () => {
         );
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [id]
   );
 
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(id);
+  }, [id]);
+
   useEffect(() => {
-    console.log(winner);
     if (state === 'waiting') {
       dispatch(setRoomId(id));
+      setToLocalStorage('roomId', id);
       dispatch(
         createNewRoom({
           id,
@@ -66,6 +72,8 @@ const Menu = () => {
         })
       );
     }
+    /// TODO check if adding other deps doesn't break anything
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, id, player]);
 
   useEffect(() => {
@@ -73,28 +81,9 @@ const Menu = () => {
   }, [history, isGameStarted]);
 
   useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected');
-    });
-
-    socket.on('message', (data) => {
-      dispatch(setData(data));
-    });
-
-    socket.on('initialData', (data) => {
-      if (roomId !== null) {
-        dispatch(
-          setInitialData({
-            turn: data.turn,
-            player: data.initialPlayer === 'One' ? 'Two' : 'One',
-          })
-        );
-        dispatch(startGame());
-
-        socket.emit('startGame', { isGameStarted: true, id: roomId });
-      }
-    });
-  }, [roomId]);
+    const savedRoomId = getFromLocalStorage('roomId');
+    if (savedRoomId) dispatch(setRoomId(savedRoomId));
+  });
 
   const renderContent = useCallback((type: string) => {
     switch (type) {
@@ -111,10 +100,10 @@ const Menu = () => {
         );
       case 'join':
         return (
-          <>
+          <div className="join-container">
             <p>Paste in your code:</p>
             <input type="text" onChange={handleIdInput} />
-          </>
+          </div>
         );
       case 'select':
         return (
@@ -128,19 +117,19 @@ const Menu = () => {
         );
       case 'waiting':
         return (
-          <>
+          <div className="waiting">
             <p>Waiting for second player to join...</p>
             <p>Copy this code and send to second player:</p>
             <div>
-              <p>{id}</p>
-              <button>Copy</button>
+              <p className="id">{id}</p>
+              <button onClick={handleCopy}>Copy</button>
             </div>
-          </>
+          </div>
         );
       default:
         return null;
     }
-  }, []);
+  }, [handleIdInput, handlePlayerSelect, id]);
 
   return <div className="menu">{renderContent(state)}</div>;
 };

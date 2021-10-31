@@ -5,7 +5,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { hover, move, place, Position, postGameData } from '../redux/slices/playfiedSlice';
 import { RootState } from '../redux/store';
 import { some } from 'lodash';
-import { getWallCoords, isCurrentPlayerTurn, isLegalMove, isLegalWallPlacement } from '../utils/utils';
+import {
+  doesPlayerHaveWalls,
+  getWallCoords,
+  isCurrentPlayerTurn,
+  isLegalMove,
+  isLegalWallPlacement
+} from '../utils/utils';
 
 const Playfield = () => {
   const dispatch = useDispatch();
@@ -71,7 +77,7 @@ const Playfield = () => {
         const newWallCoords = getWallCoords({ row, col }, type);
         if (
           isLegalWallPlacement(newWallCoords, playfieldState.placed) &&
-          playfieldState.playerOneWallsLeft > 0 &&
+          doesPlayerHaveWalls(playfieldState.player, playfieldState.playerOneWallsLeft, playfieldState.playerTwoWallsLeft) &&
           isCurrentPlayerTurn(playfieldState.turn, playfieldState.player)
         ) {
           dispatch(hover(newWallCoords));
@@ -82,7 +88,7 @@ const Playfield = () => {
         const newWallCoords = getWallCoords({ row, col }, type);
         if (
           isLegalWallPlacement(newWallCoords, playfieldState.placed) &&
-          playfieldState.playerOneWallsLeft > 0 &&
+          doesPlayerHaveWalls(playfieldState.player, playfieldState.playerOneWallsLeft, playfieldState.playerTwoWallsLeft) &&
           isCurrentPlayerTurn(playfieldState.turn, playfieldState.player)
         ) {
           dispatch(place(newWallCoords));
@@ -115,6 +121,7 @@ const Playfield = () => {
         </div>
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [playfieldState]
   );
 
@@ -131,6 +138,7 @@ const Playfield = () => {
         id: playfieldState.roomId,
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     playfieldState.playerOnePos,
     playfieldState.playerTwoPos,
@@ -143,9 +151,9 @@ const Playfield = () => {
       {!playfieldState.winner && (
         <>
           <div className="info">
-            <p>Turn: {playfieldState.turn}</p>
-            <p>Player one walls: {playfieldState.playerOneWallsLeft}</p>
-            <p>Player two walls: {playfieldState.playerTwoWallsLeft} </p>
+            <p>{isCurrentPlayerTurn(playfieldState.turn, playfieldState.player) ? 'Your turn' : 'Enemy turn'}</p>
+            <p>Your walls: {playfieldState.player === 'One' ? playfieldState.playerOneWallsLeft : playfieldState.playerTwoWallsLeft}</p>
+            <p>Enemy walls: {playfieldState.player === 'Two' ? playfieldState.playerOneWallsLeft : playfieldState.playerTwoWallsLeft} </p>
           </div>
           <div className={cx('playfield', { upsideDown: playfieldState.player === 'Two' })}>
             {PLAYFIELD_INITIAL_STATE.map((row, i) => (
