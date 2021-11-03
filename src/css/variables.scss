@@ -5,8 +5,8 @@ $color-white: #ffffff;
 $color-text: #d8dce0;
 $color-blue: darken(lightgray, 10%);
 
-$playfield: calc(min(700px, 90vw));
-$tile: calc((#{$playfield} - 30px - 12px * 8) / 9);
+$playfield: fit-content;
+$tile: 62px;
 
 $wall-horizontal-width: $tile;
 $wall-horizontal-height: 10px;

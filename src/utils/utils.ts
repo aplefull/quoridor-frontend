@@ -1,6 +1,8 @@
 import { Player, Position } from '../redux/slices/playfiedSlice';
-import { filter, intersectionWith, isEqual, isEmpty } from 'lodash';
-import { ELEMENTS, PLAYFIELD_SIZE } from '../constants';
+import { filter, intersectionWith, isEqual, isEmpty, uniqWith, concat, some, keys, pickBy } from 'lodash';
+import { ELEMENTS, PLAYFIELD_INITIAL_STATE, PLAYFIELD_SIZE } from '../constants';
+import path from 'ngraph.path';
+import createGraph from 'ngraph.graph';
 
 const isBetween = (num: number, val1: number, val2: number) => {
   const min = Math.min(val1, val2);
@@ -62,6 +64,25 @@ export const isLegalMove = (
   }
 };
 
+export const availableMoves = (currentPosition: Position, walls: Position[]) => {
+  const possiblePositions: Position[] = [
+    { row: currentPosition.row - 2, col: currentPosition.col },
+    { row: currentPosition.row + 2, col: currentPosition.col },
+    { row: currentPosition.row, col: currentPosition.col - 2 },
+    { row: currentPosition.row, col: currentPosition.col + 2 },
+  ];
+
+  return possiblePositions.filter((position) => {
+    return (
+      isLegalMove(currentPosition, currentPosition, position, 'One', walls) &&
+      position.col >= 0 &&
+      position.col <= PLAYFIELD_SIZE &&
+      position.row >= 0 &&
+      position.row <= PLAYFIELD_SIZE
+    );
+  });
+};
+
 export const isLegalWallPlacement = (newCoords: Position[], walls: Position[]) => {
   return isEmpty(intersectionWith(walls, newCoords, isEqual));
 };
@@ -102,6 +123,74 @@ export const getWallCoords = (desirablePos: Position, wallType: string) => {
         ];
   }
   return [];
+};
+
+export const isBlockingPath = (
+  playerOnePos: Position,
+  playerTwoPos: Position,
+  newCoords: Position[],
+  placed: Position[],
+) => {
+  const allWalls = concat(newCoords, placed);
+  const graph = createGraph();
+
+  const playerOneGoal = PLAYFIELD_INITIAL_STATE[0].content
+    .map((el, i) => (el.type === ELEMENTS.TILE ? `0-${i}` : null))
+    .filter(Boolean) as string[];
+  const playerTwoGoal = PLAYFIELD_INITIAL_STATE[PLAYFIELD_SIZE].content
+    .map((el, i) => (el.type === ELEMENTS.TILE ? `16-${i}` : null))
+    .filter(Boolean) as string[];
+
+  const allPositions: Position[] = PLAYFIELD_INITIAL_STATE.map((row, i) =>
+    row.content.map((el, j) => (el.type === ELEMENTS.TILE ? { row: i, col: j } : null))
+  )
+    .flat()
+    .filter(Boolean) as Position[];
+
+  const nodes = allPositions.map((pos) => `${pos.row}-${pos.col}`);
+
+  nodes.forEach((node) => {
+    graph.addNode(node);
+  });
+
+  allPositions.forEach((position) => {
+    availableMoves(position, allWalls)
+      .map((pos) => `${pos.row}-${pos.col}`)
+      .forEach((node) => {
+        graph.addLink(`${position.row}-${position.col}`, node);
+      });
+  });
+
+  const pathFinder = path.aStar(graph);
+
+  const canPlayerOneReachGoal = playerOneGoal.some((node) => pathFinder.find(`${playerOnePos.row}-${playerOnePos.col}`, node).length > 0);
+  const canPlayerTwoReachGoal = playerTwoGoal.some((node) => pathFinder.find(`${playerTwoPos.row}-${playerTwoPos.col}`, node).length > 0);
+
+  return !(canPlayerOneReachGoal && canPlayerTwoReachGoal);
+};
+
+export const wallClassName = (wallType: string, hovered: Position[], placed: Position[], currentPosition: Position) => {
+  const { row, col } = currentPosition;
+
+  if (wallType === ELEMENTS.INTERSECTION) {
+    const comparisonArr = uniqWith(concat(hovered, placed), isEqual);
+    const classnames = {
+      'intersection-horizontal': false,
+      'intersection-vertical': false,
+    };
+
+    if (some(comparisonArr, { row: row, col: col + 1 }) && some(comparisonArr, { row: row, col: col - 1 })) {
+      classnames['intersection-horizontal'] = true;
+    }
+
+    if (some(comparisonArr, { row: row + 1, col: col }) && some(comparisonArr, { row: row - 1, col: col })) {
+      classnames['intersection-vertical'] = true;
+    }
+
+    return keys(pickBy(classnames, Boolean)).join(' ');
+  }
+
+  return '';
 };
 
 export const getFromLocalStorage = (key: string) => {

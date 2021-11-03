@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { PLAYFIELD_SIZE } from '../../constants';
 import { deleteFromLocalStorage, setToLocalStorage } from '../../utils/utils';
-import { doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, getDoc, onSnapshot, getDocs, collection, deleteDoc } from 'firebase/firestore';
 import { RootState } from '../store';
 import { cloneDeep } from 'lodash';
 import { db } from '../../App';
@@ -63,6 +63,7 @@ export const postGameData = createAsyncThunk('game/postData', async (data: any) 
     }
   );
 });
+
 export const createNewRoom = createAsyncThunk('game/createNewRoom', async (data: any, { dispatch }) => {
   const {
     numberOfPlayers,
@@ -77,6 +78,12 @@ export const createNewRoom = createAsyncThunk('game/createNewRoom', async (data:
     placed,
     winner,
   } = data;
+
+  // delete all documents
+  /*const querySnapshot = await getDocs(collection(db, "rooms"));
+  querySnapshot.forEach((doc: any) => {
+    deleteDoc(doc.ref);
+  });*/
 
   const docRef = doc(db, 'rooms', id);
 
@@ -95,10 +102,38 @@ export const createNewRoom = createAsyncThunk('game/createNewRoom', async (data:
   });
 
   onSnapshot(docRef, (doc) => {
-    console.log('new data: ', doc.data());
     dispatch(setData(doc.data()));
   });
 });
+
+export const restartGame = createAsyncThunk('game/restart', async (data: any) => {
+  const { roomId } = data;
+
+  const docRef = doc(db, 'rooms', roomId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    await setDoc(
+      docRef,
+      {
+        hovered: [],
+        placed: [],
+        playerOnePos: { row: 16, col: 8 },
+        playerTwoPos: { row: 0, col: 8 },
+        playerOneWallsLeft: 10,
+        playerTwoWallsLeft: 10,
+        turn: 'One',
+        isGameStarted: true,
+        roomId: roomId,
+        winner: null,
+      },
+      {
+        merge: true,
+      }
+    );
+  }
+});
+
 export const joinRoom = createAsyncThunk('game/joinRoom', async (data: any, { dispatch }) => {
   const { id } = data;
 
@@ -127,15 +162,33 @@ export const joinRoom = createAsyncThunk('game/joinRoom', async (data: any, { di
         })
       );
       setToLocalStorage('roomId', id);
+      setToLocalStorage('player', data.initialPlayer === 'One' ? 'Two' : 'One');
     }
 
     onSnapshot(docRef, (doc) => {
-      console.log('new data: ', doc.data());
       dispatch(setData(doc.data()));
     });
   }
 });
-export const rejoinRoom = createAsyncThunk('game/rejoinRoom', async (data: any) => {});
+
+export const rejoinRoom = createAsyncThunk('game/rejoinRoom', async (data: any, { dispatch }) => {
+  const id = data.roomId;
+
+  const docRef = doc(db, 'rooms', id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    onSnapshot(docRef, (doc) => {
+      dispatch(setData(doc.data()));
+    });
+    dispatch(selectPlayer(data.player));
+    dispatch(setRoomId(id));
+  } else {
+    deleteFromLocalStorage('roomId');
+    deleteFromLocalStorage('player');
+  }
+});
+
 export const leaveRoom = createAsyncThunk('game/leaveRoom', async (data: any) => {
   const { id } = data;
 
@@ -171,7 +224,6 @@ export const move = createAsyncThunk('game/move', async (data: any, { getState, 
   if (data.row === PLAYFIELD_SIZE && state.player === 'Two') newState.winner = 'Two';
 
   if (state.winner) {
-    deleteFromLocalStorage('id');
     dispatch(leaveRoom(state.roomId));
   }
 
@@ -180,7 +232,7 @@ export const move = createAsyncThunk('game/move', async (data: any, { getState, 
   } else {
     newState.turn = 'One';
   }
-  console.log('state:', newState);
+
   dispatch(
     postGameData({
       playerOnePos: newState.playerOnePos,
@@ -193,6 +245,7 @@ export const move = createAsyncThunk('game/move', async (data: any, { getState, 
       id: newState.roomId,
     })
   );
+
   return newState;
 });
 

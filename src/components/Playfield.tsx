@@ -2,27 +2,47 @@ import React, { useCallback, useEffect } from 'react';
 import { ELEMENTS, PLAYFIELD_INITIAL_STATE, ROW_TYPES } from '../constants';
 import cx from 'classnames';
 import { useDispatch, useSelector } from 'react-redux';
-import { hover, move, place, Position, postGameData } from '../redux/slices/playfiedSlice';
+import { hover, move, place, Position, postGameData, rejoinRoom, restartGame } from '../redux/slices/playfiedSlice';
+import { toast, ToastContainer } from 'react-toastify';
 import { RootState } from '../redux/store';
 import { some } from 'lodash';
+import { useLocation } from 'react-router-dom';
 import {
   doesPlayerHaveWalls,
+  getFromLocalStorage,
   getWallCoords,
+  isBlockingPath,
   isCurrentPlayerTurn,
   isLegalMove,
-  isLegalWallPlacement
+  isLegalWallPlacement,
+  wallClassName,
 } from '../utils/utils';
+
+import 'react-toastify/dist/ReactToastify.css';
 
 const Playfield = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const playfieldState = useSelector((state: RootState) => state.playfield);
+  const {
+    hovered,
+    placed,
+    winner,
+    turn,
+    player,
+    roomId,
+    playerOneWallsLeft,
+    playerTwoWallsLeft,
+    playerOnePos,
+    playerTwoPos,
+  } = playfieldState;
 
   const renderElement = useCallback(
     ({ row, col }: Position) => {
       const name = PLAYFIELD_INITIAL_STATE[row].content[col].type;
       const isWall = name === ELEMENTS.HORIZONTAL_WALL || name === ELEMENTS.VERTICAL_WALL;
-      const containsPlayer = row === playfieldState.playerOnePos.row && col === playfieldState.playerOnePos.col;
-      const containsEnemy = row === playfieldState.playerTwoPos.row && col === playfieldState.playerTwoPos.col;
+      const containsPlayer = row === playerOnePos.row && col === playerOnePos.col;
+      const containsEnemy = row === playerTwoPos.row && col === playerTwoPos.col;
 
       const className = cx({
         tile: name === ELEMENTS.TILE,
@@ -30,8 +50,9 @@ const Playfield = () => {
         horizontal: name === ELEMENTS.HORIZONTAL_WALL,
         vertical: name === ELEMENTS.VERTICAL_WALL,
         intersection: name === ELEMENTS.INTERSECTION,
-        hovered: some(playfieldState.hovered, { row, col }),
-        placed: some(playfieldState.placed, { row, col }),
+        hovered: some(hovered, { row, col }),
+        placed: some(placed, { row, col }),
+        [wallClassName(name, hovered, placed, { row, col })]: true,
       });
 
       const playerClassName = cx({
@@ -76,9 +97,9 @@ const Playfield = () => {
 
         const newWallCoords = getWallCoords({ row, col }, type);
         if (
-          isLegalWallPlacement(newWallCoords, playfieldState.placed) &&
-          doesPlayerHaveWalls(playfieldState.player, playfieldState.playerOneWallsLeft, playfieldState.playerTwoWallsLeft) &&
-          isCurrentPlayerTurn(playfieldState.turn, playfieldState.player)
+          isLegalWallPlacement(newWallCoords, placed) &&
+          doesPlayerHaveWalls(player, playerOneWallsLeft, playerTwoWallsLeft) &&
+          isCurrentPlayerTurn(turn, player)
         ) {
           dispatch(hover(newWallCoords));
         }
@@ -86,10 +107,16 @@ const Playfield = () => {
 
       const handleClick = (type: string) => () => {
         const newWallCoords = getWallCoords({ row, col }, type);
+
+        if (isBlockingPath(playerOnePos, playerTwoPos, newWallCoords, placed) && isCurrentPlayerTurn(turn, player)) {
+          toast("You can't place a wall here!");
+          return;
+        }
+
         if (
-          isLegalWallPlacement(newWallCoords, playfieldState.placed) &&
-          doesPlayerHaveWalls(playfieldState.player, playfieldState.playerOneWallsLeft, playfieldState.playerTwoWallsLeft) &&
-          isCurrentPlayerTurn(playfieldState.turn, playfieldState.player)
+          isLegalWallPlacement(newWallCoords, placed) &&
+          doesPlayerHaveWalls(player, playerOneWallsLeft, playerTwoWallsLeft) &&
+          isCurrentPlayerTurn(turn, player)
         ) {
           dispatch(place(newWallCoords));
         }
@@ -97,14 +124,8 @@ const Playfield = () => {
 
       const handleTileClick = () => () => {
         if (
-          isLegalMove(
-            playfieldState.playerOnePos,
-            playfieldState.playerTwoPos,
-            { row, col },
-            playfieldState.player,
-            playfieldState.placed
-          ) &&
-          isCurrentPlayerTurn(playfieldState.turn, playfieldState.player)
+          isLegalMove(playerOnePos, playerTwoPos, { row, col }, player, placed) &&
+          isCurrentPlayerTurn(turn, player)
         ) {
           dispatch(move({ row, col }));
         }
@@ -125,37 +146,44 @@ const Playfield = () => {
     [playfieldState]
   );
 
+  const handleRestart = useCallback(() => {
+    dispatch(restartGame({ roomId }));
+  }, [roomId, dispatch]);
+
   useEffect(() => {
-    dispatch(
-      postGameData({
-        playerOnePos: playfieldState.playerOnePos,
-        playerTwoPos: playfieldState.playerTwoPos,
-        playerOneWallsLeft: playfieldState.playerOneWallsLeft,
-        playerTwoWallsLeft: playfieldState.playerTwoWallsLeft,
-        placed: playfieldState.placed,
-        turn: playfieldState.turn,
-        winner: playfieldState.winner,
-        id: playfieldState.roomId,
-      })
-    );
+    if (roomId !== null) {
+      dispatch(
+        postGameData({
+          playerOnePos: playerOnePos,
+          playerTwoPos: playerTwoPos,
+          playerOneWallsLeft: playerOneWallsLeft,
+          playerTwoWallsLeft: playerTwoWallsLeft,
+          placed: placed,
+          turn: turn,
+          winner: winner,
+          id: roomId,
+        })
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    playfieldState.playerOnePos,
-    playfieldState.playerTwoPos,
-    playfieldState.playerOneWallsLeft,
-    playfieldState.playerTwoWallsLeft,
-  ]);
+  }, [playerOnePos, playerTwoPos, playerOneWallsLeft, playerTwoWallsLeft]);
+
+  useEffect(() => {
+    if (location.pathname === '/play' && getFromLocalStorage('roomId') && getFromLocalStorage('player')) {
+      const roomId = getFromLocalStorage('roomId');
+      const player = getFromLocalStorage('player');
+
+      dispatch(rejoinRoom({ roomId, player }));
+    }
+  }, []);
 
   return (
     <div className="container">
-      {!playfieldState.winner && (
+      {!winner && (
         <>
-          <div className="info">
-            <p>{isCurrentPlayerTurn(playfieldState.turn, playfieldState.player) ? 'Your turn' : 'Enemy turn'}</p>
-            <p>Your walls: {playfieldState.player === 'One' ? playfieldState.playerOneWallsLeft : playfieldState.playerTwoWallsLeft}</p>
-            <p>Enemy walls: {playfieldState.player === 'Two' ? playfieldState.playerOneWallsLeft : playfieldState.playerTwoWallsLeft} </p>
-          </div>
-          <div className={cx('playfield', { upsideDown: playfieldState.player === 'Two' })}>
+          <p className="current-turn">{isCurrentPlayerTurn(turn, player) ? 'Your turn' : 'Enemy turn'}</p>
+          <p className="walls-count">{`Enemy walls: ${player === 'Two' ? playerOneWallsLeft : playerTwoWallsLeft}`}</p>
+          <div className={cx('playfield', { upsideDown: player === 'Two' })}>
             {PLAYFIELD_INITIAL_STATE.map((row, i) => (
               <div key={`${i}-row`} className={cx({ row, small: row.type === ROW_TYPES.SMALL })}>
                 {row.content.map((el, j) => (
@@ -164,17 +192,32 @@ const Playfield = () => {
               </div>
             ))}
           </div>
+          <p className="walls-count">{`Your walls: ${player === 'One' ? playerOneWallsLeft : playerTwoWallsLeft}`}</p>
         </>
       )}
-      {playfieldState.winner && (
+      {winner && (
         <div className="end-screen">
-          {playfieldState.winner === playfieldState.player ? (
-            <p>You won, congrats!</p>
-          ) : (
-            <p>You'll get it next time...</p>
-          )}
+          {winner === player ? <p>You won, congrats!</p> : <p>You'll get it next time...</p>}
+          <img src="https://gifgifmagazine.com/uploads/gif/content_image_5fe780e452618.gif" alt="" />
+          <button onClick={handleRestart}>Restart!</button>
         </div>
       )}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick={true}
+        pauseOnFocusLoss={false}
+        draggable={true}
+        pauseOnHover={false}
+        limit={3}
+        closeButton={false}
+        toastClassName="toast-body"
+        bodyClassName="toast-content"
+        className="toast-container"
+        progressClassName="toast-progress-bar"
+      />
     </div>
   );
 };

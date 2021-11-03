@@ -16,7 +16,6 @@ const Menu = () => {
   const {
     isGameStarted,
     player,
-    roomId,
     playerOnePos,
     playerTwoPos,
     playerOneWallsLeft,
@@ -48,14 +47,15 @@ const Menu = () => {
     [id]
   );
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(id);
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(id);
   }, [id]);
 
   useEffect(() => {
     if (state === 'waiting') {
       dispatch(setRoomId(id));
       setToLocalStorage('roomId', id);
+      setToLocalStorage('player', player);
       dispatch(
         createNewRoom({
           id,
