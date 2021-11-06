@@ -1,10 +1,10 @@
-@import "../variables";
+@import '../variables';
 
 .toast-body {
-  background-color: #2b2b2b;
+  background-color: $color-toast;
   user-select: none;
 }
 
 .toast-progress-bar {
-  background: $color-blue;
+  background: $color-light-gray;
 }

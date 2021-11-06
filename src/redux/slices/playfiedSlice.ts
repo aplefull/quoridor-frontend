@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { PLAYFIELD_SIZE } from '../../constants';
+import { PLAYFIELD_SIZE } from '../../constants/constants';
 import { deleteFromLocalStorage, setToLocalStorage } from '../../utils/utils';
 import { doc, setDoc, getDoc, onSnapshot, getDocs, collection, deleteDoc } from 'firebase/firestore';
 import { RootState } from '../store';

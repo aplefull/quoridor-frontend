@@ -1,6 +1,7 @@
 import { Player, Position } from '../redux/slices/playfiedSlice';
-import { filter, intersectionWith, isEqual, isEmpty, uniqWith, concat, some, keys, pickBy } from 'lodash';
-import { ELEMENTS, PLAYFIELD_INITIAL_STATE, PLAYFIELD_SIZE } from '../constants';
+import { filter, intersectionWith, isEqual, isEmpty, uniqWith, concat, some, keys, pickBy, sample } from 'lodash';
+import { ELEMENTS, PLAYFIELD_INITIAL_STATE, PLAYFIELD_SIZE } from '../constants/constants';
+import { gifs } from '../constants/constants.gifs';
 import path from 'ngraph.path';
 import createGraph from 'ngraph.graph';
 
@@ -73,14 +74,82 @@ export const availableMoves = (currentPosition: Position, walls: Position[]) => 
   ];
 
   return possiblePositions.filter((position) => {
-    return (
-      isLegalMove(currentPosition, currentPosition, position, 'One', walls) &&
-      position.col >= 0 &&
-      position.col <= PLAYFIELD_SIZE &&
-      position.row >= 0 &&
-      position.row <= PLAYFIELD_SIZE
-    );
+    return isLegalMove(currentPosition, currentPosition, position, 'One', walls) && !isOutOfBounds(position);
   });
+};
+
+export const availableMovesWithPlayer = (
+  playerOnePos: Position,
+  playerTwoPos: Position,
+  currentPlayer: Player,
+  walls: Position[]
+) => {
+  const currentPosition = currentPlayer === 'One' ? playerOnePos : playerTwoPos;
+  const enemyPosition = currentPlayer === 'One' ? playerTwoPos : playerOnePos;
+
+  const possiblePositions: Position[] = [
+    { row: currentPosition.row - 2, col: currentPosition.col },
+    { row: currentPosition.row + 2, col: currentPosition.col },
+    { row: currentPosition.row, col: currentPosition.col - 2 },
+    { row: currentPosition.row, col: currentPosition.col + 2 },
+  ].filter(
+    (position) => isLegalMove(playerOnePos, playerTwoPos, position, currentPlayer, walls) && !isOutOfBounds(position)
+  );
+
+  if (isEnemyNearby(playerOnePos, playerTwoPos)) {
+    const moveDir = getMoveDirection(currentPosition, enemyPosition);
+    let newMove;
+    switch (moveDir) {
+      case 'UP':
+        newMove = { row: currentPosition.row - 4, col: currentPosition.col };
+        break;
+      case 'DOWN':
+        newMove = { row: currentPosition.row + 4, col: currentPosition.col };
+        break;
+      case 'LEFT':
+        newMove = { row: currentPosition.row, col: currentPosition.col - 4 };
+        break;
+      case 'RIGHT':
+        newMove = { row: currentPosition.row, col: currentPosition.col + 4 };
+        break;
+      default:
+        newMove = { row: currentPosition.row - 4, col: currentPosition.col };
+    }
+
+    if (!isOutOfBounds(newMove) && isLegalMove(enemyPosition, enemyPosition, newMove, currentPlayer, walls)) {
+      possiblePositions.push(newMove);
+    } else {
+      getFourAdjacentPositions(enemyPosition)
+        .filter((pos) => {
+          return isLegalMove(enemyPosition, currentPosition, pos, 'One', walls);
+        })
+        .forEach((pos) => {
+          possiblePositions.push(pos);
+        });
+    }
+  }
+
+  return possiblePositions;
+};
+
+export const getFourAdjacentPositions = (position: Position): Position[] => {
+  return [
+    { row: position.row - 2, col: position.col },
+    { row: position.row + 2, col: position.col },
+    { row: position.row, col: position.col - 2 },
+    { row: position.row, col: position.col + 2 },
+  ];
+};
+
+export const isOutOfBounds = (position: Position) => {
+  return !(position.col >= 0 && position.col <= PLAYFIELD_SIZE && position.row >= 0 && position.row <= PLAYFIELD_SIZE);
+};
+
+export const isEnemyNearby = (playerOnePos: Position, playerTwoPos: Position) => {
+  const rowDiff = Math.abs(playerOnePos.row - playerTwoPos.row);
+  const colDiff = Math.abs(playerOnePos.col - playerTwoPos.col);
+
+  return rowDiff + colDiff <= 2;
 };
 
 export const isLegalWallPlacement = (newCoords: Position[], walls: Position[]) => {
@@ -129,7 +198,7 @@ export const isBlockingPath = (
   playerOnePos: Position,
   playerTwoPos: Position,
   newCoords: Position[],
-  placed: Position[],
+  placed: Position[]
 ) => {
   const allWalls = concat(newCoords, placed);
   const graph = createGraph();
@@ -163,8 +232,12 @@ export const isBlockingPath = (
 
   const pathFinder = path.aStar(graph);
 
-  const canPlayerOneReachGoal = playerOneGoal.some((node) => pathFinder.find(`${playerOnePos.row}-${playerOnePos.col}`, node).length > 0);
-  const canPlayerTwoReachGoal = playerTwoGoal.some((node) => pathFinder.find(`${playerTwoPos.row}-${playerTwoPos.col}`, node).length > 0);
+  const canPlayerOneReachGoal = playerOneGoal.some(
+    (node) => pathFinder.find(`${playerOnePos.row}-${playerOnePos.col}`, node).length > 0
+  );
+  const canPlayerTwoReachGoal = playerTwoGoal.some(
+    (node) => pathFinder.find(`${playerTwoPos.row}-${playerTwoPos.col}`, node).length > 0
+  );
 
   return !(canPlayerOneReachGoal && canPlayerTwoReachGoal);
 };
@@ -191,6 +264,10 @@ export const wallClassName = (wallType: string, hovered: Position[], placed: Pos
   }
 
   return '';
+};
+
+export const getRandomGif = (isWinner: boolean) => {
+  return isWinner ? sample(gifs.win) : sample(gifs.lose);
 };
 
 export const getFromLocalStorage = (key: string) => {

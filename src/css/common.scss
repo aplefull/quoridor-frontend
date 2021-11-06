@@ -2,12 +2,21 @@
 
 * {
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: $font-family-apple;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+  background-color: $color-dark-gray;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: $color-darker-gray;
 }
 
 ::selection {
-  background-color: hotpink;
+  background-color: $color-selection;
 }
 
 h1,
@@ -26,5 +35,5 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: $font-family-code;
 }

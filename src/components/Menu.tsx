@@ -13,16 +13,8 @@ const Menu = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const {
-    isGameStarted,
-    player,
-    playerOnePos,
-    playerTwoPos,
-    playerOneWallsLeft,
-    playerTwoWallsLeft,
-    placed,
-    winner,
-  } = useSelector((state: RootState) => state.playfield);
+  const { isGameStarted, player, playerOnePos, playerTwoPos, playerOneWallsLeft, playerTwoWallsLeft, placed, winner } =
+    useSelector((state: RootState) => state.playfield);
 
   const handlePlayerSelect = useCallback(
     (value: string) => () => {
@@ -85,51 +77,54 @@ const Menu = () => {
     if (savedRoomId) dispatch(setRoomId(savedRoomId));
   });
 
-  const renderContent = useCallback((type: string) => {
-    switch (type) {
-      case 'initial':
-        return (
-          <>
-            <button className="create-new" onClick={() => setState('select')}>
-              Create new room
-            </button>
-            <button className="join" onClick={() => setState('join')}>
-              Join room
-            </button>
-          </>
-        );
-      case 'join':
-        return (
-          <div className="join-container">
-            <p>Paste in your code:</p>
-            <input type="text" onChange={handleIdInput} />
-          </div>
-        );
-      case 'select':
-        return (
-          <>
-            <p>Select your color. (Whites go first)</p>
-            <div className="player-select">
-              <div className="white" onClick={handlePlayerSelect('One')} />
-              <div className="black" onClick={handlePlayerSelect('Two')} />
+  const renderContent = useCallback(
+    (type: string) => {
+      switch (type) {
+        case 'initial':
+          return (
+            <>
+              <button className="create-new" onClick={() => setState('select')}>
+                Create new room
+              </button>
+              <button className="join" onClick={() => setState('join')}>
+                Join room
+              </button>
+            </>
+          );
+        case 'join':
+          return (
+            <div className="join-container">
+              <p>Paste in your code:</p>
+              <input type="text" onChange={handleIdInput} />
             </div>
-          </>
-        );
-      case 'waiting':
-        return (
-          <div className="waiting">
-            <p>Waiting for second player to join...</p>
-            <p>Copy this code and send to second player:</p>
-            <div>
-              <p className="id">{id}</p>
-              <button onClick={handleCopy}>Copy</button>
+          );
+        case 'select':
+          return (
+            <>
+              <p>Select your color. (Whites go first)</p>
+              <div className="player-select">
+                <div className="white" onClick={handlePlayerSelect('One')} />
+                <div className="black" onClick={handlePlayerSelect('Two')} />
+              </div>
+            </>
+          );
+        case 'waiting':
+          return (
+            <div className="waiting">
+              <p>Waiting for second player to join...</p>
+              <p>Copy this code and send to second player:</p>
+              <div>
+                <p className="id">{id}</p>
+                <button onClick={handleCopy}>Copy</button>
+              </div>
             </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  }, [handleIdInput, handlePlayerSelect, id]);
+          );
+        default:
+          return null;
+      }
+    },
+    [handleIdInput, handlePlayerSelect, id, handleCopy]
+  );
 
   return <div className="menu">{renderContent(state)}</div>;
 };

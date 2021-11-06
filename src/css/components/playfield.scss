@@ -1,9 +1,9 @@
-@import "../variables";
+@import '../variables';
 
 .playfield {
-  width: $playfield;
-  height: fit-content;
-  border-radius: 5px;
+  width: $playfield-width;
+  height: $playfield-height;
+  border-radius: $border-radius-medium;
   background-color: $color-dark-gray;
   box-shadow: rgba($color-black, 65%) 0 0 15px;
   padding: 15px;
@@ -22,18 +22,39 @@
 }
 
 .tile {
-  background-color: $color-pink;
-  border-radius: 5px;
-  width: $tile;
-  height: $tile;
+  background-color: $color-main;
+  border-radius: $border-radius-medium;
+  width: $tile-width;
+  height: $tile-height;
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+
+  &.active {
+    cursor: pointer;
+
+    &.canGo {
+      &::before {
+        content: '';
+        display: block;
+        background-color: $color-light-gray;
+        border-radius: 50%;
+        width: 70%;
+        height: 70%;
+        opacity: 0.2;
+      }
+
+      &:hover {
+        &::before {
+          opacity: 0.4;
+        }
+      }
+    }
+  }
 }
 
 .wall {
-  background-color: $color-blue;
+  background-color: $color-light-gray;
   opacity: 0;
 
   &.horizontal {
@@ -60,9 +81,9 @@
 }
 
 .intersection {
-  background-color: $color-blue;
-  width: $intersection;
-  height: $intersection;
+  background-color: $color-light-gray;
+  width: $intersection-width;
+  height: $intersection-height;
   opacity: 0;
   margin: 0 2px;
 
@@ -87,7 +108,7 @@
     left: -2px;
     width: 14px;
     height: 10px;
-    background-color: $color-blue;
+    background-color: $color-light-gray;
     display: block;
   }
 }
@@ -101,7 +122,7 @@
     top: -2px;
     width: 10px;
     height: 14px;
-    background-color: $color-blue;
+    background-color: $color-light-gray;
     display: block;
   }
 }
@@ -116,7 +137,7 @@
     left: 0;
     width: 10px;
     height: 14px;
-    background-color: $color-blue;
+    background-color: $color-light-gray;
     display: block;
   }
 
@@ -126,23 +147,23 @@
     left: -2px;
     width: 14px;
     height: 10px;
-    background-color: $color-blue;
+    background-color: $color-light-gray;
     display: block;
   }
 }
 
-.player {
+.player-one {
   width: 70%;
   height: 70%;
-  border-radius: 50%;
-  background-color: $color-black;
+  border-radius: $border-radius-round;
+  background-color: $color-white;
 }
 
-.enemy {
+.player-two {
   width: 70%;
   height: 70%;
-  border-radius: 50%;
-  background-color: $color-white;
+  border-radius: $border-radius-round;
+  background-color: $color-black;
 }
 
 .upsideDown {

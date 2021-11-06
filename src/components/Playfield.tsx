@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect } from 'react';
-import { ELEMENTS, PLAYFIELD_INITIAL_STATE, ROW_TYPES } from '../constants';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { ELEMENTS, PLAYFIELD_INITIAL_STATE, ROW_TYPES } from '../constants/constants';
 import cx from 'classnames';
 import { useDispatch, useSelector } from 'react-redux';
 import { hover, move, place, Position, postGameData, rejoinRoom, restartGame } from '../redux/slices/playfiedSlice';
@@ -8,12 +8,13 @@ import { RootState } from '../redux/store';
 import { some } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import {
+  availableMovesWithPlayer,
   doesPlayerHaveWalls,
   getFromLocalStorage,
+  getRandomGif,
   getWallCoords,
   isBlockingPath,
   isCurrentPlayerTurn,
-  isLegalMove,
   isLegalWallPlacement,
   wallClassName,
 } from '../utils/utils';
@@ -37,27 +38,33 @@ const Playfield = () => {
     playerTwoPos,
   } = playfieldState;
 
+  const availableMoves = useMemo(() => {
+    return availableMovesWithPlayer(playerOnePos, playerTwoPos, player, placed);
+  }, [playerOnePos, playerTwoPos, player, placed]);
+
   const renderElement = useCallback(
     ({ row, col }: Position) => {
       const name = PLAYFIELD_INITIAL_STATE[row].content[col].type;
       const isWall = name === ELEMENTS.HORIZONTAL_WALL || name === ELEMENTS.VERTICAL_WALL;
-      const containsPlayer = row === playerOnePos.row && col === playerOnePos.col;
-      const containsEnemy = row === playerTwoPos.row && col === playerTwoPos.col;
+      const containsPlayerOne = row === playerOnePos.row && col === playerOnePos.col;
+      const containsPlayerTwo = row === playerTwoPos.row && col === playerTwoPos.col;
 
       const className = cx({
         tile: name === ELEMENTS.TILE,
+        active: name === ELEMENTS.TILE && isCurrentPlayerTurn(turn, player),
         wall: isWall,
         horizontal: name === ELEMENTS.HORIZONTAL_WALL,
         vertical: name === ELEMENTS.VERTICAL_WALL,
         intersection: name === ELEMENTS.INTERSECTION,
         hovered: some(hovered, { row, col }),
         placed: some(placed, { row, col }),
+        canGo: some(availableMoves, { row, col }),
         [wallClassName(name, hovered, placed, { row, col })]: true,
       });
 
       const playerClassName = cx({
-        player: containsEnemy,
-        enemy: containsPlayer,
+        'player-one': containsPlayerOne,
+        'player-two': containsPlayerTwo,
       });
 
       const selectHandler = (element: string, listener: string) => {
@@ -124,7 +131,7 @@ const Playfield = () => {
 
       const handleTileClick = () => () => {
         if (
-          isLegalMove(playerOnePos, playerTwoPos, { row, col }, player, placed) &&
+          some(availableMovesWithPlayer(playerOnePos, playerTwoPos, player, placed), { row, col }) &&
           isCurrentPlayerTurn(turn, player)
         ) {
           dispatch(move({ row, col }));
@@ -138,7 +145,7 @@ const Playfield = () => {
           onMouseLeave={selectHandler(name, 'onMouseLeave')}
           onClick={selectHandler(name, 'onClick')}
         >
-          {(containsPlayer || containsEnemy) && <div className={playerClassName} />}
+          {(containsPlayerOne || containsPlayerTwo) && <div className={playerClassName} />}
         </div>
       );
     },
@@ -175,14 +182,15 @@ const Playfield = () => {
 
       dispatch(rejoinRoom({ roomId, player }));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="container">
       {!winner && (
         <>
-          <p className="current-turn">{isCurrentPlayerTurn(turn, player) ? 'Your turn' : 'Enemy turn'}</p>
-          <p className="walls-count">{`Enemy walls: ${player === 'Two' ? playerOneWallsLeft : playerTwoWallsLeft}`}</p>
+          <p className="current-turn">{isCurrentPlayerTurn(turn, player) ? 'Your turn' : 'Opponent\'s turn'}</p>
+          <p className="walls-count">{`Opponent's walls: ${player === 'Two' ? playerOneWallsLeft : playerTwoWallsLeft}`}</p>
           <div className={cx('playfield', { upsideDown: player === 'Two' })}>
             {PLAYFIELD_INITIAL_STATE.map((row, i) => (
               <div key={`${i}-row`} className={cx({ row, small: row.type === ROW_TYPES.SMALL })}>
@@ -198,7 +206,7 @@ const Playfield = () => {
       {winner && (
         <div className="end-screen">
           {winner === player ? <p>You won, congrats!</p> : <p>You'll get it next time...</p>}
-          <img src="https://gifgifmagazine.com/uploads/gif/content_image_5fe780e452618.gif" alt="" />
+          <img src={getRandomGif(winner === player)} alt="" />
           <button onClick={handleRestart}>Restart!</button>
         </div>
       )}
