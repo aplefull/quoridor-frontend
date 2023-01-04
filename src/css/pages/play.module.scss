@@ -1,0 +1,64 @@
+@import '../variables';
+
+.wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.currentTurn {
+  width: 100%;
+  text-align: center;
+  font-size: 35px;
+  opacity: 0.7;
+  margin-bottom: 0;
+  margin-top: 20px;
+}
+
+.wallsCount {
+  text-align: right;
+  font-size: 18px;
+}
+
+.endScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border-radius: $border-radius-x-large;
+  box-shadow: rgba($color-black, 65%) 0 0 15px;
+
+  p {
+    font-size: 24px;
+    margin: 10px 0;
+    opacity: 0.7;
+  }
+
+  img {
+    width: 450px;
+    height: auto;
+    margin: 20px 0;
+  }
+
+  button {
+    width: 100px;
+    height: 25px;
+    border-radius: $border-radius-large;
+    color: $color-white;
+    background-color: $color-darker-gray;
+    border: 1px solid rgba($color-white, 0.5);
+    cursor: pointer;
+    margin-top: 20px;
+
+    &:hover {
+      background-color: lighten($color-darker-gray, 5%);
+    }
+  }
+}

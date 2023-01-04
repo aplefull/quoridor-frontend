@@ -6,6 +6,7 @@ import { createNewRoom, joinRoom } from '../redux/slices/playfiedSlice';
 import { RootState } from '../redux/store';
 import { useHistory } from 'react-router-dom';
 import { getFromLocalStorage, setToLocalStorage } from '../utils/utils';
+import styles from '../css/components/menu.module.scss';
 
 const Menu = () => {
   const [state, setState] = useState('initial');
@@ -83,17 +84,17 @@ const Menu = () => {
         case 'initial':
           return (
             <>
-              <button className="create-new" onClick={() => setState('select')}>
+              <button className={styles.createNew} onClick={() => setState('select')}>
                 Create new room
               </button>
-              <button className="join" onClick={() => setState('join')}>
+              <button className={styles.join} onClick={() => setState('join')}>
                 Join room
               </button>
             </>
           );
         case 'join':
           return (
-            <div className="join-container">
+            <div className={styles.joinCcontainer}>
               <p>Paste in your code:</p>
               <input type="text" onChange={handleIdInput} />
             </div>
@@ -102,19 +103,19 @@ const Menu = () => {
           return (
             <>
               <p>Select your color. (Whites go first)</p>
-              <div className="player-select">
-                <div className="white" onClick={handlePlayerSelect('One')} />
-                <div className="black" onClick={handlePlayerSelect('Two')} />
+              <div className={styles.playerSelect}>
+                <div className={styles.white} onClick={handlePlayerSelect('One')} />
+                <div className={styles.black} onClick={handlePlayerSelect('Two')} />
               </div>
             </>
           );
         case 'waiting':
           return (
-            <div className="waiting">
+            <div className={styles.waiting}>
               <p>Waiting for second player to join...</p>
               <p>Copy this code and send to second player:</p>
               <div>
-                <p className="id">{id}</p>
+                <p className={styles.id}>{id}</p>
                 <button onClick={handleCopy}>Copy</button>
               </div>
             </div>
@@ -126,7 +127,7 @@ const Menu = () => {
     [handleIdInput, handlePlayerSelect, id, handleCopy]
   );
 
-  return <div className="menu">{renderContent(state)}</div>;
+  return <div className={styles.menu}>{renderContent(state)}</div>;
 };
 
 export default Menu;

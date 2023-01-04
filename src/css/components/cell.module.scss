@@ -1,0 +1,48 @@
+// TODO use alias
+@import '../variables';
+
+.tile {
+  background-color: $color-main;
+  border-radius: $border-radius-medium;
+  width: $tile-width;
+  height: $tile-height;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &.active {
+    cursor: pointer;
+
+    &.canGo {
+      &::before {
+        content: '';
+        display: block;
+        background-color: $color-light-gray;
+        border-radius: 50%;
+        width: 70%;
+        height: 70%;
+        opacity: 0.2;
+      }
+
+      &:hover {
+        &::before {
+          opacity: 0.4;
+        }
+      }
+    }
+  }
+}
+
+.playerOne {
+  width: 70%;
+  height: 70%;
+  border-radius: $border-radius-round;
+  background-color: $color-white;
+}
+
+.playerTwo {
+  width: 70%;
+  height: 70%;
+  border-radius: $border-radius-round;
+  background-color: $color-black;
+}

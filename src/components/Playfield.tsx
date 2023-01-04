@@ -1,233 +1,67 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { ELEMENTS, PLAYFIELD_INITIAL_STATE, ROW_TYPES } from '../constants/constants';
 import cx from 'classnames';
-import { useDispatch, useSelector } from 'react-redux';
-import { hover, move, place, Position, postGameData, rejoinRoom, restartGame } from '../redux/slices/playfiedSlice';
-import { toast, ToastContainer } from 'react-toastify';
-import { RootState } from '../redux/store';
 import { some } from 'lodash';
-import { useLocation } from 'react-router-dom';
-import {
-  availableMovesWithPlayer,
-  doesPlayerHaveWalls,
-  getFromLocalStorage,
-  getRandomGif,
-  getWallCoords,
-  isBlockingPath,
-  isCurrentPlayerTurn,
-  isLegalWallPlacement,
-  wallClassName,
-} from '../utils/utils';
+import { availableMovesWithPlayer, doesPlayerHaveWalls, isCurrentPlayerTurn } from '../utils/utils';
+import { PlayfieldElement } from './PlayfieldElement';
+import React, { useMemo, useState } from 'react';
+import { PLAYFIELD_INITIAL_STATE } from '../constants/constants';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { Position } from '../redux/slices/playfiedSlice';
+import styles from '../css/components/playfield.module.scss';
 
-import 'react-toastify/dist/ReactToastify.css';
-
-const Playfield = () => {
-  const dispatch = useDispatch();
-  const location = useLocation();
-  const playfieldState = useSelector((state: RootState) => state.playfield);
-  const {
-    hovered,
-    placed,
-    winner,
-    turn,
-    player,
-    roomId,
-    playerOneWallsLeft,
-    playerTwoWallsLeft,
-    playerOnePos,
-    playerTwoPos,
-  } = playfieldState;
+export const Playfield = () => {
+  const [hovered, setHovered] = useState<Position[]>([]);
+  const { placed, turn, player, playerOneWallsLeft, playerTwoWallsLeft, playerOnePos, playerTwoPos } = useSelector(
+    (state: RootState) => state.playfield
+  );
 
   const availableMoves = useMemo(() => {
     return availableMovesWithPlayer(playerOnePos, playerTwoPos, player, placed);
   }, [playerOnePos, playerTwoPos, player, placed]);
 
-  const renderElement = useCallback(
-    ({ row, col }: Position) => {
-      const name = PLAYFIELD_INITIAL_STATE[row].content[col].type;
-      const isWall = name === ELEMENTS.HORIZONTAL_WALL || name === ELEMENTS.VERTICAL_WALL;
-      const containsPlayerOne = row === playerOnePos.row && col === playerOnePos.col;
-      const containsPlayerTwo = row === playerTwoPos.row && col === playerTwoPos.col;
+  const newGrid = PLAYFIELD_INITIAL_STATE.map((row) => row.content).flat();
 
-      const className = cx({
-        tile: name === ELEMENTS.TILE,
-        active: name === ELEMENTS.TILE && isCurrentPlayerTurn(turn, player),
-        wall: isWall,
-        horizontal: name === ELEMENTS.HORIZONTAL_WALL,
-        vertical: name === ELEMENTS.VERTICAL_WALL,
-        intersection: name === ELEMENTS.INTERSECTION,
-        hovered: some(hovered, { row, col }),
-        placed: some(placed, { row, col }),
-        canGo: some(availableMoves, { row, col }),
-        [wallClassName(name, hovered, placed, { row, col })]: true,
-      });
+  const getRowCol = (index: number) => {
+    const row = Math.floor(index / 17);
+    const col = index % 17;
 
-      const playerClassName = cx({
-        'player-one': containsPlayerOne,
-        'player-two': containsPlayerTwo,
-      });
-
-      const selectHandler = (element: string, listener: string) => {
-        switch (listener) {
-          case 'onMouseEnter':
-          case 'onMouseLeave':
-            switch (element) {
-              case ELEMENTS.HORIZONTAL_WALL:
-              case ELEMENTS.VERTICAL_WALL:
-                return handleHover(name);
-
-              default:
-                return undefined;
-            }
-
-          case 'onClick':
-            switch (element) {
-              case ELEMENTS.HORIZONTAL_WALL:
-              case ELEMENTS.VERTICAL_WALL:
-                return handleClick(name);
-              case ELEMENTS.TILE:
-                return handleTileClick();
-              default:
-                return undefined;
-            }
-
-          default:
-            return undefined;
-        }
-      };
-
-      const handleHover = (type: string) => (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.type === 'mouseleave') {
-          dispatch(hover([]));
-          return;
-        }
-
-        const newWallCoords = getWallCoords({ row, col }, type);
-        if (
-          isLegalWallPlacement(newWallCoords, placed) &&
-          doesPlayerHaveWalls(player, playerOneWallsLeft, playerTwoWallsLeft) &&
-          isCurrentPlayerTurn(turn, player)
-        ) {
-          dispatch(hover(newWallCoords));
-        }
-      };
-
-      const handleClick = (type: string) => () => {
-        const newWallCoords = getWallCoords({ row, col }, type);
-
-        if (isBlockingPath(playerOnePos, playerTwoPos, newWallCoords, placed) && isCurrentPlayerTurn(turn, player)) {
-          toast("You can't place a wall here!");
-          return;
-        }
-
-        if (
-          isLegalWallPlacement(newWallCoords, placed) &&
-          doesPlayerHaveWalls(player, playerOneWallsLeft, playerTwoWallsLeft) &&
-          isCurrentPlayerTurn(turn, player)
-        ) {
-          dispatch(place(newWallCoords));
-        }
-      };
-
-      const handleTileClick = () => () => {
-        if (
-          some(availableMovesWithPlayer(playerOnePos, playerTwoPos, player, placed), { row, col }) &&
-          isCurrentPlayerTurn(turn, player)
-        ) {
-          dispatch(move({ row, col }));
-        }
-      };
-
-      return (
-        <div
-          className={className}
-          onMouseEnter={selectHandler(name, 'onMouseEnter')}
-          onMouseLeave={selectHandler(name, 'onMouseLeave')}
-          onClick={selectHandler(name, 'onClick')}
-        >
-          {(containsPlayerOne || containsPlayerTwo) && <div className={playerClassName} />}
-        </div>
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playfieldState]
-  );
-
-  const handleRestart = useCallback(() => {
-    dispatch(restartGame({ roomId }));
-  }, [roomId, dispatch]);
-
-  useEffect(() => {
-    if (roomId !== null) {
-      dispatch(
-        postGameData({
-          playerOnePos: playerOnePos,
-          playerTwoPos: playerTwoPos,
-          playerOneWallsLeft: playerOneWallsLeft,
-          playerTwoWallsLeft: playerTwoWallsLeft,
-          placed: placed,
-          turn: turn,
-          winner: winner,
-          id: roomId,
-        })
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerOnePos, playerTwoPos, playerOneWallsLeft, playerTwoWallsLeft]);
-
-  useEffect(() => {
-    if (location.pathname === '/play' && getFromLocalStorage('roomId') && getFromLocalStorage('player')) {
-      const roomId = getFromLocalStorage('roomId');
-      const player = getFromLocalStorage('player');
-
-      dispatch(rejoinRoom({ roomId, player }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return { row, col };
+  };
 
   return (
-    <div className="container">
-      {!winner && (
-        <>
-          <p className="current-turn">{isCurrentPlayerTurn(turn, player) ? 'Your turn' : 'Opponent\'s turn'}</p>
-          <p className="walls-count">{`Opponent's walls: ${player === 'Two' ? playerOneWallsLeft : playerTwoWallsLeft}`}</p>
-          <div className={cx('playfield', { upsideDown: player === 'Two' })}>
-            {PLAYFIELD_INITIAL_STATE.map((row, i) => (
-              <div key={`${i}-row`} className={cx({ row, small: row.type === ROW_TYPES.SMALL })}>
-                {row.content.map((el, j) => (
-                  <React.Fragment key={`${j}-element`}>{renderElement({ row: i, col: j })}</React.Fragment>
-                ))}
-              </div>
-            ))}
-          </div>
-          <p className="walls-count">{`Your walls: ${player === 'One' ? playerOneWallsLeft : playerTwoWallsLeft}`}</p>
-        </>
-      )}
-      {winner && (
-        <div className="end-screen">
-          {winner === player ? <p>You won, congrats!</p> : <p>You'll get it next time...</p>}
-          <img src={getRandomGif(winner === player)} alt="" />
-          <button onClick={handleRestart}>Restart!</button>
-        </div>
-      )}
-      <ToastContainer
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick={true}
-        pauseOnFocusLoss={false}
-        draggable={true}
-        pauseOnHover={false}
-        limit={3}
-        closeButton={false}
-        toastClassName="toast-body"
-        bodyClassName="toast-content"
-        className="toast-container"
-        progressClassName="toast-progress-bar"
-      />
+    <div
+      className={cx(styles.playfield, { [styles.upsideDown]: player === 'Two' })}
+      style={{ gridTemplateColumns: '6fr 1fr 6fr 1fr 6fr 1fr 6fr 1fr 6fr 1fr 6fr 1fr 6fr 1fr 6fr 1fr 6fr' }}
+    >
+      {newGrid.map((el, i) => {
+        const position = getRowCol(i);
+        const { row, col } = position;
+
+        const isHovered = some(hovered, position);
+        const canPlace =
+          doesPlayerHaveWalls(player, playerOneWallsLeft, playerTwoWallsLeft) && isCurrentPlayerTurn(turn, player);
+
+        const containsPlayerOne = row === playerOnePos.row && col === playerOnePos.col;
+        const containsPlayerTwo = row === playerTwoPos.row && col === playerTwoPos.col;
+
+        return (
+          <PlayfieldElement
+            position={position}
+            /*@ts-ignore*/
+            type={el.type}
+            isActive={el.isActive}
+            isHovered={isHovered}
+            canPlace={canPlace}
+            isPlaced={some(placed, position)}
+            onHover={setHovered}
+            containsPlayerOne={containsPlayerOne}
+            containsPlayerTwo={containsPlayerTwo}
+            canGoHere={some(availableMoves, position)}
+            isCurrentTurn={isCurrentPlayerTurn(turn, player)}
+            key={i}
+          />
+        );
+      })}
     </div>
   );
 };
-
-export default Playfield;

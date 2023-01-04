@@ -1,57 +1,4 @@
-@import '../variables';
-
-.playfield {
-  width: $playfield-width;
-  height: $playfield-height;
-  border-radius: $border-radius-medium;
-  background-color: $color-dark-gray;
-  box-shadow: rgba($color-black, 65%) 0 0 15px;
-  padding: 15px;
-}
-
-.row {
-  width: 100%;
-  display: flex;
-  height: fit-content;
-
-  &.small {
-    height: fit-content;
-    display: flex;
-    align-items: center;
-  }
-}
-
-.tile {
-  background-color: $color-main;
-  border-radius: $border-radius-medium;
-  width: $tile-width;
-  height: $tile-height;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  &.active {
-    cursor: pointer;
-
-    &.canGo {
-      &::before {
-        content: '';
-        display: block;
-        background-color: $color-light-gray;
-        border-radius: 50%;
-        width: 70%;
-        height: 70%;
-        opacity: 0.2;
-      }
-
-      &:hover {
-        &::before {
-          opacity: 0.4;
-        }
-      }
-    }
-  }
-}
+@import "../variables";
 
 .wall {
   background-color: $color-light-gray;
@@ -150,22 +97,4 @@
     background-color: $color-light-gray;
     display: block;
   }
-}
-
-.player-one {
-  width: 70%;
-  height: 70%;
-  border-radius: $border-radius-round;
-  background-color: $color-white;
-}
-
-.player-two {
-  width: 70%;
-  height: 70%;
-  border-radius: $border-radius-round;
-  background-color: $color-black;
-}
-
-.upsideDown {
-  transform: rotate(180deg);
 }

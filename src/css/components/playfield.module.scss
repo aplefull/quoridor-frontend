@@ -1,0 +1,16 @@
+@import '../variables';
+
+.playfield {
+  width: 90vw;
+  max-width: 699px;
+  height: $playfield-height;
+  border-radius: $border-radius-medium;
+  background-color: $color-dark-gray;
+  box-shadow: rgba($color-black, 65%) 0 0 15px;
+  padding: 15px;
+  display: grid;
+}
+
+.upsideDown {
+  transform: rotate(180deg);
+}
