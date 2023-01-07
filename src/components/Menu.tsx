@@ -1,20 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectPlayer, setRoomId } from '../redux/slices/playfiedSlice';
 import { v4, validate } from 'uuid';
 import { createNewRoom, joinRoom } from '../redux/slices/playfiedSlice';
-import { RootState } from '../redux/store';
-import { useHistory } from 'react-router-dom';
+import { AppDispatch, RootState } from '../redux/store';
+import { useNavigate } from 'react-router-dom';
 import { getFromLocalStorage, setToLocalStorage } from '../utils/utils';
 import styles from '../css/components/menu.module.scss';
 
 const Menu = () => {
   const [state, setState] = useState('initial');
   const id = useMemo(() => v4(), []);
-  const dispatch = useDispatch();
-  const history = useHistory();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
-  const { isGameStarted, player, playerOnePos, playerTwoPos, playerOneWallsLeft, playerTwoWallsLeft, placed, winner } =
+  const { isGameStarted, player, playerOnePos, playerTwoPos, playerOneWallsLeft, playerTwoWallsLeft, placed, hovered, winner } =
     useSelector((state: RootState) => state.playfield);
 
   const handlePlayerSelect = useCallback(
@@ -22,12 +22,11 @@ const Menu = () => {
       dispatch(selectPlayer(value));
       setState('waiting');
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const handleIdInput = useCallback(
-    (e) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       if (validate(e.target.value)) {
         dispatch(
           joinRoom({
@@ -36,7 +35,6 @@ const Menu = () => {
         );
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [id]
   );
 
@@ -51,9 +49,8 @@ const Menu = () => {
       setToLocalStorage('player', player);
       dispatch(
         createNewRoom({
-          id,
+          roomId: id,
           player,
-          numberOfPlayers: 1,
           turn: 'One',
           isGameStarted: false,
           playerOnePos,
@@ -61,22 +58,17 @@ const Menu = () => {
           playerOneWallsLeft,
           playerTwoWallsLeft,
           placed,
+          hovered,
           winner,
         })
       );
     }
     /// TODO check if adding other deps doesn't break anything
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, id, player]);
 
   useEffect(() => {
-    if (isGameStarted) history.push('/play');
-  }, [history, isGameStarted]);
-
-  useEffect(() => {
-    const savedRoomId = getFromLocalStorage('roomId');
-    if (savedRoomId) dispatch(setRoomId(savedRoomId));
-  });
+    if (isGameStarted) navigate(`/play/${id}/${player}`);
+  }, [navigate, isGameStarted, id, player]);
 
   const renderContent = useCallback(
     (type: string) => {
@@ -94,7 +86,7 @@ const Menu = () => {
           );
         case 'join':
           return (
-            <div className={styles.joinCcontainer}>
+            <div className={styles.joinContainer}>
               <p>Paste in your code:</p>
               <input type="text" onChange={handleIdInput} />
             </div>

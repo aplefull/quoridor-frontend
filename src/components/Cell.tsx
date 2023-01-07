@@ -4,7 +4,7 @@ import { move, Position } from '../redux/slices/playfiedSlice';
 import { some } from 'lodash';
 import { availableMovesWithPlayer, isCurrentPlayerTurn } from '../utils/utils';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import { AppDispatch, RootState } from '../redux/store';
 import styles from '../css/components/cell.module.scss';
 
 export type TCellProps = {
@@ -18,7 +18,7 @@ export type TCellProps = {
 // TODO make sure that the component is not re-rendered if the props are the same (position)
 const Cell = memo(({ containsPlayerOne, containsPlayerTwo, canGoHere, isCurrentTurn, position }: TCellProps) => {
   console.log('render');
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { playerOnePos, playerTwoPos, player, placed, turn } = useSelector((state: RootState) => state.playfield);
 
   const handleClick = () => {

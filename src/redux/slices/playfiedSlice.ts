@@ -13,7 +13,7 @@ export type Position = {
 
 export type Player = 'One' | 'Two';
 
-export type InitialPlayfieldStateType = {
+export type InitialPlayfieldState = {
   hovered: Position[];
   placed: Position[];
   playerOnePos: Position;
@@ -27,7 +27,7 @@ export type InitialPlayfieldStateType = {
   winner: Player | null;
 };
 
-const initialState: InitialPlayfieldStateType = {
+const initialState: InitialPlayfieldState = {
   hovered: [],
   placed: [],
   playerOnePos: { row: 16, col: 8 },
@@ -64,11 +64,10 @@ export const postGameData = createAsyncThunk('game/postData', async (data: any) 
   );
 });
 
-export const createNewRoom = createAsyncThunk('game/createNewRoom', async (data: any, { dispatch }) => {
+export const createNewRoom = createAsyncThunk<void, InitialPlayfieldState>('game/createNewRoom', async (data, { dispatch }) => {
   const {
-    numberOfPlayers,
     player,
-    id,
+    roomId,
     turn,
     isGameStarted,
     playerOneWallsLeft,
@@ -79,18 +78,23 @@ export const createNewRoom = createAsyncThunk('game/createNewRoom', async (data:
     winner,
   } = data;
 
+  // TODO
   // delete all documents
   /*const querySnapshot = await getDocs(collection(db, "rooms"));
   querySnapshot.forEach((doc: any) => {
     deleteDoc(doc.ref);
   });*/
 
-  const docRef = doc(db, 'rooms', id);
+  if (!roomId) {
+    console.error('Room id is not provided');
+    return;
+  }
+
+  const docRef = doc(db, 'rooms', roomId);
 
   await setDoc(docRef, {
-    numberOfPlayers,
     initialPlayer: player,
-    roomId: id,
+    roomId,
     turn,
     isGameStarted,
     playerOneWallsLeft,

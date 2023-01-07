@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { postGameData, rejoinRoom, restartGame } from '../redux/slices/playfiedSlice';
 import { ToastContainer } from 'react-toastify';
-import { RootState } from '../redux/store';
+import { AppDispatch, RootState } from '../redux/store';
 import { useLocation } from 'react-router-dom';
-import { getFromLocalStorage, getRandomGif, isCurrentPlayerTurn } from '../utils/utils';
+import { getRandomGif, isCurrentPlayerTurn } from '../utils/utils';
 
 import globalStyles from '../css/global.module.scss';
 import styles from '../css/pages/play.module.scss';
@@ -14,7 +14,7 @@ import { Playfield } from '../components/Playfield';
 const Play = () => {
   const { placed, winner, turn, player, roomId, playerOneWallsLeft, playerTwoWallsLeft, playerOnePos, playerTwoPos } =
     useSelector((state: RootState) => state.playfield);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
 
   const handleRestart = () => {
@@ -36,17 +36,15 @@ const Play = () => {
         })
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerOnePos, playerTwoPos, playerOneWallsLeft, playerTwoWallsLeft]);
 
   useEffect(() => {
-    if (location.pathname === '/play' && getFromLocalStorage('roomId') && getFromLocalStorage('player')) {
-      const roomId = getFromLocalStorage('roomId');
-      const player = getFromLocalStorage('player');
-
+    const path = location.pathname.split('/').filter(Boolean);
+    if (path[0] === 'play') {
+      const roomId = path[1];
+      const player = path[2];
       dispatch(rejoinRoom({ roomId, player }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
