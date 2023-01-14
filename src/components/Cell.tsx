@@ -13,11 +13,10 @@ export type TCellProps = {
   canGoHere: boolean;
   isCurrentTurn: boolean;
   position: Position;
+  size: number;
 };
 
-// TODO make sure that the component is not re-rendered if the props are the same (position)
-const Cell = memo(({ containsPlayerOne, containsPlayerTwo, canGoHere, isCurrentTurn, position }: TCellProps) => {
-  console.log('render');
+const Cell = memo(({ containsPlayerOne, containsPlayerTwo, canGoHere, isCurrentTurn, position, size }: TCellProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { playerOnePos, playerTwoPos, player, placed, turn } = useSelector((state: RootState) => state.playfield);
 
@@ -30,8 +29,14 @@ const Cell = memo(({ containsPlayerOne, containsPlayerTwo, canGoHere, isCurrentT
     }
   };
 
+  const style = {
+    width: `${size}px`,
+    height: `${size}px`,
+  }
+
   return (
     <div
+      style={style}
       onClick={handleClick}
       className={classNames(styles.tile, { [styles.canGo]: canGoHere, [styles.active]: isCurrentTurn })}
     >

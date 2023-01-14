@@ -12,6 +12,10 @@ const isBetween = (num: number, val1: number, val2: number) => {
   return num > min && num < max;
 };
 
+const notNull = <T>(value: T | null): value is T => {
+  return value !== null;
+};
+
 const getMoveDirection = (currentPos: Position, desirablePos: Position) => {
   const rowOffset = currentPos.row - desirablePos.row;
   const colOffset = currentPos.col - desirablePos.col;
@@ -165,7 +169,7 @@ export const doesPlayerHaveWalls = (player: Player, playerOneWalls: number, play
   else return playerTwoWalls > 0;
 };
 
-export const getWallCoords = (desirablePos: Position, wallType: string) => {
+export const getWallCoords = (desirablePos: Position, wallType: string): Position[] => {
   if (wallType === ELEMENTS.VERTICAL_WALL) {
     return desirablePos.row === PLAYFIELD_SIZE
       ? [
@@ -203,18 +207,18 @@ export const isBlockingPath = (
   const allWalls = concat(newCoords, placed);
   const graph = createGraph();
 
-  const playerOneGoal = PLAYFIELD_INITIAL_STATE[0].content
-    .map((el, i) => (el.type === ELEMENTS.TILE ? `0-${i}` : null))
-    .filter(Boolean) as string[];
-  const playerTwoGoal = PLAYFIELD_INITIAL_STATE[PLAYFIELD_SIZE].content
-    .map((el, i) => (el.type === ELEMENTS.TILE ? `16-${i}` : null))
-    .filter(Boolean) as string[];
+  const playerOneGoal = PLAYFIELD_INITIAL_STATE[0]
+    .map((el, i) => (el === ELEMENTS.TILE ? `0-${i}` : null))
+    .filter(notNull);
+  const playerTwoGoal = PLAYFIELD_INITIAL_STATE[PLAYFIELD_SIZE].map((el, i) =>
+    el === ELEMENTS.TILE ? `16-${i}` : null
+  ).filter(notNull);
 
-  const allPositions: Position[] = PLAYFIELD_INITIAL_STATE.map((row, i) =>
-    row.content.map((el, j) => (el.type === ELEMENTS.TILE ? { row: i, col: j } : null))
+  const allPositions = PLAYFIELD_INITIAL_STATE.map((row, i) =>
+    row.map((el, j) => (el === ELEMENTS.TILE ? { row: i, col: j } : null))
   )
     .flat()
-    .filter(Boolean) as Position[];
+    .filter(notNull);
 
   const nodes = allPositions.map((pos) => `${pos.row}-${pos.col}`);
 

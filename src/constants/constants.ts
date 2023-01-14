@@ -1,7 +1,3 @@
-import { cloneDeep } from 'lodash';
-
-export const ENVIRONMENT = process.env.NODE_ENV;
-
 export const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyDVQdMWVjV5taAPUp27i6btz9ag1cHpVr8',
   authDomain: 'quoridor-game-c684f.firebaseapp.com',
@@ -12,82 +8,73 @@ export const FIREBASE_CONFIG = {
   appId: '1:1020112765303:web:d575477aa29fe6d040a172',
 };
 
-export const ROW_TYPES = {
-  FULL: 'FULL',
-  SMALL: 'SMALL',
-};
-
 export const ELEMENTS = {
   TILE: 'tile',
   VERTICAL_WALL: 'vertical_wall',
   HORIZONTAL_WALL: 'horizontal_wall',
   INTERSECTION: 'intersection',
-};
+} as const;
 
-const FULL_ROW = {
-  type: ROW_TYPES.FULL,
-  content: [
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-    { type: 'vertical_wall', isActive: false, isHovered: false },
-    { type: 'tile' },
-  ],
-};
+export type TElements = typeof ELEMENTS[keyof typeof ELEMENTS];
 
-const SMALL_ROW = {
-  type: ROW_TYPES.SMALL,
-  content: [
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-    { type: 'intersection', isActive: false, isHovered: false },
-    { type: 'horizontal_wall', isActive: false, isHovered: false },
-  ],
-};
+const FULL_ROW = [
+  'tile',
+  'vertical_wall',
+  'tile',
+  'vertical_wall',
+  'tile',
+  'vertical_wall',
+  'tile',
+  'vertical_wall',
+  'tile',
+  'vertical_wall',
+  'tile',
+  'vertical_wall',
+  'tile',
+  'vertical_wall',
+  'tile',
+  'vertical_wall',
+  'tile',
+] as const;
+
+const SMALL_ROW = [
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+  'intersection',
+  'horizontal_wall',
+] as const;
 
 export const PLAYFIELD_INITIAL_STATE = [
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
-  cloneDeep(SMALL_ROW),
-  cloneDeep(FULL_ROW),
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
+  [...SMALL_ROW],
+  [...FULL_ROW],
 ];
 
 export const PLAYFIELD_SIZE = PLAYFIELD_INITIAL_STATE.length - 1;

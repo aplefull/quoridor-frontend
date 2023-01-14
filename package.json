@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@mantine/core": "^5.10.0",
+    "@mantine/hooks": "^5.10.0",
     "@reduxjs/toolkit": "^1.9.1",
     "@vitejs/plugin-react-swc": "^3.0.1",
     "classnames": "^2.3.2",
@@ -24,7 +27,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prettier": "prettier --write src/**/*.{js,jsx,ts,tsx,css,scss}"
   },
   "browserslist": {
     "production": [

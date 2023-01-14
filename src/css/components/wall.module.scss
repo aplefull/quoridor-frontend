@@ -6,18 +6,10 @@
 
   &.horizontal {
     margin: 2px 0;
-    width: $wall-horizontal-width;
-    max-width: $wall-horizontal-width;
-    min-width: $wall-horizontal-width;
-    height: $wall-horizontal-height;
   }
 
   &.vertical {
     margin: 0 2px;
-    width: $wall-vertical-width;
-    max-width: $wall-vertical-width;
-    min-width: $wall-vertical-width;
-    height: $wall-vertical-height;
   }
 
   &.hovered,

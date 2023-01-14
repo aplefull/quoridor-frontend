@@ -4,7 +4,9 @@ import './css/index.scss';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 
-const root = createRoot(document.getElementById('root')!);
+const rootElement = document.getElementById('root');
+const root = createRoot(rootElement!);
+// TODO investigate why moving provider inside App breaks hmr
 root.render(
   <Provider store={store}>
     <App />
