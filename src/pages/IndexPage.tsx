@@ -1,8 +1,11 @@
+// LIBRARIES
+import { memo } from 'react';
+// COMPONENTS
+import { Menu } from '@components';
+// STYLES
 import globalStyles from '../css/global.module.scss';
-import { Menu } from '../components/Menu';
-import React, { memo } from 'react';
 
-export const Index = memo(() => {
+export const IndexPage = memo(() => {
   return (
     <div className={globalStyles.wrapper}>
       <Menu />

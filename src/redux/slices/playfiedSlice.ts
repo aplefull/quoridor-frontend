@@ -1,9 +1,13 @@
+// LIBRARIES
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { PLAYFIELD_SIZE } from '../../constants/constants';
 import { doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { RootState } from '../store';
 import { cloneDeep } from 'lodash';
-import { db } from '../../App';
+// CONSTANTS
+import { PLAYFIELD_SIZE } from '@constants';
+// REDUX
+import { RootState } from '@redux';
+// COMPONENTS
+import { db } from '@components';
 
 export type Position = {
   row: number;

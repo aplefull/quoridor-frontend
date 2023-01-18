@@ -1,4 +1,7 @@
+// LIBRARIES
 import { useRouteError } from 'react-router-dom';
+// STYLES
+import styles from '../css/pages/error-page.module.scss';
 
 export const ErrorPage = () => {
   const error = useRouteError();
@@ -25,5 +28,5 @@ export const ErrorPage = () => {
     return JSON.stringify(error, null, 2);
   };
 
-  return <pre>{getErrorMessage(error)}</pre>;
+  return <pre className={styles.error}>{getErrorMessage(error)}</pre>;
 };

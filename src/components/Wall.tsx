@@ -1,11 +1,15 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../redux/store';
-import React, { memo } from 'react';
-import { getWallCoords, isBlockingPath, isLegalWallPlacement } from '../utils/utils';
-import { toast } from 'react-toastify';
-import { place, Position } from '../redux/slices/playfiedSlice';
+// LIBRARIES
 import cx from 'classnames';
-import { ELEMENTS, TElements } from '../constants/constants';
+import { memo } from 'react';
+import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+// REDUX
+import { place, Position, AppDispatch, RootState } from '@redux';
+// CONSTANTS
+import { ELEMENTS, TElements } from '@constants';
+// UTILS
+import { getWallCoords, isBlockingPath, isLegalWallPlacement } from '@utils';
+// STYLES
 import styles from '../css/components/wall.module.scss';
 
 export type TWallProps = {

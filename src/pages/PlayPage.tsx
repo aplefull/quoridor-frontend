@@ -1,15 +1,18 @@
+// LIBRARIES
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Player, restartGame } from '../redux/slices/playfiedSlice';
 import { ToastContainer } from 'react-toastify';
-import { AppDispatch, RootState } from '../redux/store';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getRandomGif, isCurrentPlayerTurn } from '../utils/utils';
-
+// REDUX
+import { Player, restartGame, AppDispatch, RootState } from '@redux';
+// UTILS
+import { getRandomGif, isCurrentPlayerTurn } from '@utils';
+// COMPONENTS
+import { Playfield } from '@components';
+// STYLES
 import globalStyles from '../css/global.module.scss';
 import styles from '../css/pages/play.module.scss';
 import 'react-toastify/dist/ReactToastify.css';
-import { Playfield } from '../components/Playfield';
 
 type TEndScreenProps = {
   winner: Player;
@@ -54,7 +57,7 @@ const PlayScreen = ({ player, playerTwoWallsLeft, playerOneWallsLeft, turn }: TP
   );
 };
 
-const Play = () => {
+export const PlayPage = () => {
   const { winner, turn, player, playerOneWallsLeft, playerTwoWallsLeft } = useSelector(
     (state: RootState) => state.playfield
   );
@@ -80,16 +83,16 @@ const Play = () => {
         )}
         {winner && <EndScreen winner={winner} player={player} />}
         <ToastContainer
-          position="bottom-right"
-          autoClose={3000}
+          newestOnTop
+          closeOnClick
+          draggable
           hideProgressBar={false}
-          newestOnTop={true}
-          closeOnClick={true}
           pauseOnFocusLoss={false}
-          draggable={true}
           pauseOnHover={false}
-          limit={3}
           closeButton={false}
+          autoClose={3000}
+          limit={3}
+          position="bottom-right"
           toastClassName="toast-body"
           bodyClassName="toast-content"
           className="toast-container"
@@ -99,5 +102,3 @@ const Play = () => {
     </div>
   );
 };
-
-export default Play;

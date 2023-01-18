@@ -1,7 +1,9 @@
-import { ELEMENTS, TElements } from '../constants/constants';
-import Cell, { TCellProps } from './Cell';
-import React, { memo } from 'react';
-import { TWallProps, Wall } from './Wall';
+// LIBRARIES
+import { memo } from 'react';
+// COMPONENTS
+import { Cell, Wall, TCellProps, TWallProps } from '@components';
+// CONSTANTS
+import { ELEMENTS, TElements } from '@constants';
 
 type TPlayfieldElementProps = Omit<TWallProps, 'width' | 'height'> &
   Omit<TCellProps, 'size'> & {

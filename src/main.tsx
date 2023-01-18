@@ -1,8 +1,12 @@
+// LIBRARIES
 import { createRoot } from 'react-dom/client';
-import App from './App';
-import './css/index.scss';
 import { Provider } from 'react-redux';
-import { store } from './redux/store';
+// REDUX
+import { store } from '@redux';
+// COMPONENTS
+import { App } from '@components';
+// STYLES
+import './css/index.scss';
 
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement!);

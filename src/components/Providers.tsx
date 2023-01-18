@@ -1,5 +1,6 @@
+// LIBRARIES
+import { ReactNode } from 'react';
 import { MantineProvider } from '@mantine/core';
-import React, { ReactNode } from 'react';
 
 type TProvidersProps = {
   children: ReactNode;
@@ -7,8 +8,8 @@ type TProvidersProps = {
 
 export const Providers = ({ children }: TProvidersProps) => {
   return (
-      <MantineProvider withGlobalStyles withCSSVariables theme={{ colorScheme: 'dark' }}>
-        {children}
-      </MantineProvider>
+    <MantineProvider withGlobalStyles withCSSVariables theme={{ colorScheme: 'dark' }}>
+      {children}
+    </MantineProvider>
   );
 };

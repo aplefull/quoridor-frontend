@@ -1,9 +1,11 @@
-import { Player, Position } from '../redux/slices/playfiedSlice';
-import { filter, intersectionWith, isEqual, isEmpty, uniqWith, concat, some, keys, pickBy, sample } from 'lodash';
-import { ELEMENTS, PLAYFIELD_INITIAL_STATE, PLAYFIELD_SIZE } from '../constants/constants';
-import { gifs } from '../constants/constants.gifs';
+// LIBRARIES
 import path from 'ngraph.path';
 import createGraph from 'ngraph.graph';
+import { filter, intersectionWith, isEqual, isEmpty, uniqWith, concat, some, keys, pickBy, sample } from 'lodash';
+// REDUX
+import { Player, Position } from '@redux';
+// CONSTANTS
+import { ELEMENTS, PLAYFIELD_INITIAL_STATE, PLAYFIELD_SIZE, gifs } from '@constants';
 
 const isBetween = (num: number, val1: number, val2: number) => {
   const min = Math.min(val1, val2);
@@ -272,16 +274,4 @@ export const wallClassName = (wallType: string, hovered: Position[], placed: Pos
 
 export const getRandomGif = (isWinner: boolean) => {
   return isWinner ? sample(gifs.win) : sample(gifs.lose);
-};
-
-export const getFromLocalStorage = (key: string) => {
-  return localStorage.getItem(key);
-};
-
-export const setToLocalStorage = (key: string, value: string) => {
-  return localStorage.setItem(key, value);
-};
-
-export const deleteFromLocalStorage = (key: string) => {
-  return localStorage.removeItem(key);
 };

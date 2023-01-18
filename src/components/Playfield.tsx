@@ -1,14 +1,20 @@
+// LIBRARIES
 import cx from 'classnames';
 import { some } from 'lodash';
-import { availableMovesWithPlayer, doesPlayerHaveWalls, isCurrentPlayerTurn } from '../utils/utils';
-import { PlayfieldElement } from './PlayfieldElement';
-import React, { useCallback, useMemo, useState } from 'react';
-import { PLAYFIELD_INITIAL_STATE } from '../constants/constants';
 import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { Position } from '../redux/slices/playfiedSlice';
+import { useCallback, useMemo, useState } from 'react';
+// REDUX
+import { RootState, Position } from '@redux';
+// UTILS
+import { availableMovesWithPlayer, doesPlayerHaveWalls, isCurrentPlayerTurn } from '@utils';
+// HOOKS
+import { useWindowSize } from '@hooks';
+// COMPONENTS
+import { PlayfieldElement } from '@components';
+// CONSTANTS
+import { PLAYFIELD_INITIAL_STATE } from '@constants';
+// STYLES
 import styles from '../css/components/playfield.module.scss';
-import { useWindowSize } from '../utils/hooks';
 
 export const Playfield = () => {
   const { width } = useWindowSize();
@@ -68,10 +74,7 @@ export const Playfield = () => {
   };
 
   return (
-    <div
-      className={cx(styles.playfield, { [styles.upsideDown]: player === 'Two' })}
-      style={style}
-    >
+    <div className={cx(styles.playfield, { [styles.upsideDown]: player === 'Two' })} style={style}>
       {grid.map((el, i) => {
         const position = useMemo(() => getRowCol(i), [i]);
         const { row, col } = position;

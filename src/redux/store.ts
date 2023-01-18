@@ -1,4 +1,6 @@
+// LIBRARIES
 import { configureStore } from '@reduxjs/toolkit';
+// SLICES
 import playfiedSlice from './slices/playfiedSlice';
 
 export const store = configureStore({

@@ -1,14 +1,14 @@
-import { createBrowserRouter, Navigate, Params, redirect, RouterProvider } from 'react-router-dom';
+// LIBRARIES
 import { validate } from 'uuid';
-import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { selectPlayer, setData, setInitialData, setRoomId } from '../redux/slices/playfiedSlice';
-import { Index } from '../pages/Index';
-import { ErrorPage } from '../pages/ErrorPage';
-import Play from '../pages/Play';
-import React from 'react';
-import { db } from '../App';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../redux/store';
+import { createBrowserRouter, Navigate, Params, redirect, RouterProvider } from 'react-router-dom';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+// REDUX
+import { selectPlayer, setData, setInitialData, setRoomId, AppDispatch } from '@redux';
+// COMPONENTS
+import { db } from '@components';
+// PAGES
+import { IndexPage, ErrorPage, PlayPage } from '@pages';
 
 export const Routes = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -65,18 +65,18 @@ export const Routes = () => {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <Index />,
+      element: <IndexPage />,
       errorElement: <ErrorPage />,
     },
     {
       path: '/play/:roomId',
-      element: <Play />,
+      element: <PlayPage />,
       errorElement: <ErrorPage />,
       loader,
     },
     {
       path: '/play/:roomId/:player',
-      element: <Play />,
+      element: <PlayPage />,
       errorElement: <ErrorPage />,
       loader,
     },

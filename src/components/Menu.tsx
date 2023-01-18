@@ -1,12 +1,13 @@
-import React, { ChangeEvent, memo, useEffect, useMemo, useState } from 'react';
+// LIBRARIES
+import { ChangeEvent, memo, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Player, selectPlayer, setRoomId } from '../redux/slices/playfiedSlice';
 import { v4, validate } from 'uuid';
-import { createNewRoom } from '../redux/slices/playfiedSlice';
-import { AppDispatch, RootState } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
-import styles from '../css/components/menu.module.scss';
 import { Button, Paper, TextInput } from '@mantine/core';
+// REDUX
+import { Player, selectPlayer, setRoomId, createNewRoom, AppDispatch, RootState } from '@redux';
+// STYLES
+import styles from '../css/components/menu.module.scss';
 
 // TODO move to constants
 const MENU_STATES = {
