@@ -2,11 +2,17 @@
 import cx from 'classnames';
 import { some } from 'lodash';
 import { useSelector } from 'react-redux';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 // REDUX
 import { RootState, Position } from '@redux';
 // UTILS
-import { availableMovesWithPlayer, doesPlayerHaveWalls, isCurrentPlayerTurn } from '@utils';
+import {
+  availableMovesWithPlayer,
+  doesPlayerHaveWalls,
+  isCurrentPlayerTurn,
+  isHorizontalIntersection,
+  isVerticalIntersection,
+} from '@utils';
 // HOOKS
 import { useWindowSize } from '@hooks';
 // COMPONENTS
@@ -16,7 +22,7 @@ import { PLAYFIELD_INITIAL_STATE } from '@constants';
 // STYLES
 import styles from '../css/components/playfield.module.scss';
 
-export const Playfield = () => {
+export const Playfield = memo(() => {
   const { width } = useWindowSize();
   const [hovered, setHovered] = useState<Position[]>([]);
   const { placed, turn, player, playerOneWallsLeft, playerTwoWallsLeft, playerOnePos, playerTwoPos } = useSelector(
@@ -73,6 +79,10 @@ export const Playfield = () => {
     height: `${playfieldSize}px`,
   };
 
+  const isCurrentTurn = isCurrentPlayerTurn(turn, player);
+  const canPlace = doesPlayerHaveWalls(player, playerOneWallsLeft, playerTwoWallsLeft) && isCurrentTurn;
+  const placedAndHovered = hovered.concat(placed);
+
   return (
     <div className={cx(styles.playfield, { [styles.upsideDown]: player === 'Two' })} style={style}>
       {grid.map((el, i) => {
@@ -82,16 +92,18 @@ export const Playfield = () => {
         const isHovered = some(hovered, position);
         const isPlaced = some(placed, position);
         const canGoHere = some(availableMoves, position);
-        const isCurrentTurn = isCurrentPlayerTurn(turn, player);
-        const canPlace = doesPlayerHaveWalls(player, playerOneWallsLeft, playerTwoWallsLeft) && isCurrentTurn;
+
+        const isVertIntersection = isVerticalIntersection(position, placedAndHovered);
+        const isHorIntersection = isHorizontalIntersection(position, placedAndHovered);
 
         const containsPlayerOne = row === playerOnePos.row && col === playerOnePos.col;
         const containsPlayerTwo = row === playerTwoPos.row && col === playerTwoPos.col;
 
         return (
           <PlayfieldElement
-            position={position}
+            key={i}
             type={el}
+            position={position}
             isHovered={isHovered}
             canPlace={canPlace}
             isPlaced={isPlaced}
@@ -100,11 +112,12 @@ export const Playfield = () => {
             containsPlayerTwo={containsPlayerTwo}
             canGoHere={canGoHere}
             isCurrentTurn={isCurrentTurn}
-            key={i}
+            isVerticalIntersection={isVertIntersection}
+            isHorizontalIntersection={isHorIntersection}
             sizes={sizes}
           />
         );
       })}
     </div>
   );
-};
+});

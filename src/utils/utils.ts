@@ -1,7 +1,7 @@
 // LIBRARIES
 import path from 'ngraph.path';
 import createGraph from 'ngraph.graph';
-import { filter, intersectionWith, isEqual, isEmpty, uniqWith, concat, some, keys, pickBy, sample } from 'lodash';
+import { filter, intersectionWith, isEqual, isEmpty, concat, some, sample } from 'lodash';
 // REDUX
 import { Player, Position } from '@redux';
 // CONSTANTS
@@ -248,28 +248,14 @@ export const isBlockingPath = (
   return !(canPlayerOneReachGoal && canPlayerTwoReachGoal);
 };
 
-export const wallClassName = (wallType: string, hovered: Position[], placed: Position[], currentPosition: Position) => {
-  const { row, col } = currentPosition;
+export const isHorizontalIntersection = (wall: Position, walls: Position[]) => {
+  const { row, col } = wall;
+  return some(walls, { row: row, col: col + 1 }) && some(walls, { row: row, col: col - 1 });
+};
 
-  if (wallType === ELEMENTS.INTERSECTION) {
-    const comparisonArr = uniqWith(concat(hovered, placed), isEqual);
-    const classnames = {
-      'intersection-horizontal': false,
-      'intersection-vertical': false,
-    };
-
-    if (some(comparisonArr, { row: row, col: col + 1 }) && some(comparisonArr, { row: row, col: col - 1 })) {
-      classnames['intersection-horizontal'] = true;
-    }
-
-    if (some(comparisonArr, { row: row + 1, col: col }) && some(comparisonArr, { row: row - 1, col: col })) {
-      classnames['intersection-vertical'] = true;
-    }
-
-    return keys(pickBy(classnames, Boolean)).join(' ');
-  }
-
-  return '';
+export const isVerticalIntersection = (wall: Position, walls: Position[]) => {
+  const { row, col } = wall;
+  return some(walls, { row: row + 1, col: col }) && some(walls, { row: row - 1, col: col });
 };
 
 export const getRandomGif = (isWinner: boolean) => {

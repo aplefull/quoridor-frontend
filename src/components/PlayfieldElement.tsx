@@ -28,6 +28,8 @@ export const PlayfieldElement = memo(
     containsPlayerTwo,
     canGoHere,
     isCurrentTurn,
+    isVerticalIntersection,
+    isHorizontalIntersection,
     sizes,
   }: TPlayfieldElementProps) => {
     if (type === ELEMENTS.TILE) {
@@ -86,6 +88,8 @@ export const PlayfieldElement = memo(
         isPlaced={isPlaced}
         width={width}
         height={height}
+        isHorizontalIntersection={isHorizontalIntersection}
+        isVerticalIntersection={isVerticalIntersection}
       />
     );
   }
