@@ -17,7 +17,7 @@
     }
   }
 
-  .innerContainer {
+  .inner-container {
     width: 100%;
     display: flex;
     gap: 20px;
@@ -25,7 +25,7 @@
     align-items: center;
   }
 
-  .createNew,
+  .create-new,
   .join {
     width: 150px;
     height: 40px;
@@ -34,11 +34,11 @@
     cursor: pointer;
   }
 
-  .playerSelectText {
+  .player-select-text {
     margin-left: 30px;
   }
 
-  .playerSelect {
+  .player-select {
     display: flex;
     gap: 20px;
     width: 100%;
@@ -91,7 +91,7 @@
     }
   }
 
-  .joinContainer {
+  .join-container {
     text-align: center;
 
     input {

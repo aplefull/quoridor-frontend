@@ -10,7 +10,7 @@ import { ELEMENTS, TElements } from '@constants';
 // UTILS
 import { getWallCoords, isBlockingPath, isLegalWallPlacement } from '@utils';
 // STYLES
-import styles from '../css/components/wall.module.scss';
+import styles from '@styles/components/wall.module.scss';
 
 export type TWallProps = {
   type: TElements;

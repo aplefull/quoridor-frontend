@@ -10,8 +10,7 @@ import { getRandomGif, isCurrentPlayerTurn } from '@utils';
 // COMPONENTS
 import { Playfield } from '@components';
 // STYLES
-import globalStyles from '../css/global.module.scss';
-import styles from '../css/pages/play.module.scss';
+import styles from '@styles/pages/play-page.module.scss';
 import 'react-toastify/dist/ReactToastify.css';
 
 type TEndScreenProps = {
@@ -71,7 +70,7 @@ export const PlayPage = () => {
   }, []);
 
   return (
-    <div className={globalStyles.wrapper}>
+    <div className={styles.wrapper}>
       <div className={styles.container}>
         {!winner && (
           <PlayScreen

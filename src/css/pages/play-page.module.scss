@@ -1,11 +1,9 @@
 @import '../variables';
 
 .wrapper {
-  width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 
 .container {
@@ -14,7 +12,7 @@
   margin: auto 0;
 }
 
-.currentTurn {
+.current-turn {
   width: 100%;
   text-align: center;
   font-size: 35px;
@@ -23,12 +21,12 @@
   margin-top: 20px;
 }
 
-.wallsCount {
+.walls-count {
   text-align: right;
   font-size: 18px;
 }
 
-.endScreen {
+.end-screen {
   display: flex;
   flex-direction: column;
   align-items: center;

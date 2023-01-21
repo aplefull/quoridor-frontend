@@ -7,7 +7,7 @@ import { Button, Paper, TextInput } from '@mantine/core';
 // REDUX
 import { Player, selectPlayer, setRoomId, createNewRoom, AppDispatch, RootState } from '@redux';
 // STYLES
-import styles from '../css/components/menu.module.scss';
+import styles from '@styles/components/menu.module.scss';
 
 // TODO move to constants
 const MENU_STATES = {

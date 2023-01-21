@@ -8,7 +8,7 @@ import { move, Position, AppDispatch, RootState } from '@redux';
 // UTILS
 import { availableMovesWithPlayer, isCurrentPlayerTurn } from '@utils';
 // STYLES
-import styles from '../css/components/cell.module.scss';
+import styles from '@styles/components/cell.module.scss';
 
 export type TCellProps = {
   containsPlayerOne: boolean;

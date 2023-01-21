@@ -20,7 +20,7 @@ import { PlayfieldElement } from '@components';
 // CONSTANTS
 import { PLAYFIELD_INITIAL_STATE } from '@constants';
 // STYLES
-import styles from '../css/components/playfield.module.scss';
+import styles from '@styles/components/playfield.module.scss';
 
 export const Playfield = memo(() => {
   const { width } = useWindowSize();
