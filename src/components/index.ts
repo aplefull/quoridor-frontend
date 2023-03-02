@@ -6,3 +6,4 @@ export * from './Menu';
 export * from './Providers';
 export * from './Playfield';
 export * from './Routes';
+export * from './Gif';

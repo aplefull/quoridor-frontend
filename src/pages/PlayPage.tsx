@@ -7,9 +7,9 @@ import { Await, useLoaderData, useNavigate, useParams } from 'react-router-dom';
 // REDUX
 import { Player, restartGame, AppDispatch, RootState } from '@redux';
 // UTILS
-import { getRandomGif, isCurrentPlayerTurn, logger } from '@utils';
+import { isCurrentPlayerTurn, logger } from '@utils';
 // COMPONENTS
-import { Playfield } from '@components';
+import { Gif, Playfield } from '@components';
 // CONSTANTS
 import { PLAYERS } from '@constants';
 // STYLES
@@ -31,7 +31,7 @@ const EndScreen = ({ winner, player }: TEndScreenProps) => {
   return (
     <Paper className={styles.endScreen}>
       {winner === player ? <p>You won, congrats!</p> : <p>You'll get it next time...</p>}
-      <img src={getRandomGif(winner === player)} alt="" />
+      <Gif isWinner={winner === player} />
       <Button onClick={handleRestart}>Restart!</Button>
     </Paper>
   );
