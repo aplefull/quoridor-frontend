@@ -1,20 +1,22 @@
 // LIBRARIES
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { doc, setDoc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { cloneDeep } from 'lodash';
 // CONSTANTS
-import { PLAYFIELD_SIZE } from '@constants';
+import { PLAYFIELD_SIZE, PLAYERS } from '@constants';
 // REDUX
 import { RootState } from '@redux';
 // COMPONENTS
-import { db } from '@components';
+import { db } from '@main';
+// UTILS
+import { logger } from '@utils';
 
 export type Position = {
   row: number;
   col: number;
 };
 
-export type Player = 'One' | 'Two';
+export type Player = typeof PLAYERS[keyof typeof PLAYERS];
 
 export type InitialPlayfieldState = {
   placed: Position[];
@@ -50,31 +52,31 @@ const initialState: InitialPlayfieldState = {
   playerTwoPos: { row: 0, col: 8 },
   playerOneWallsLeft: 10,
   playerTwoWallsLeft: 10,
-  player: 'One',
-  turn: 'One',
+  player: PLAYERS.PLAYER_1,
+  turn: PLAYERS.PLAYER_1,
   isGameStarted: false,
   roomId: null,
   winner: null,
 };
 
-export const createNewRoom = createAsyncThunk<void, { player: Player; roomId: string }, { state: RootState }>(
+export const createNewRoom = createAsyncThunk<void, { initialPlayer: Player; roomId: string }, { state: RootState }>(
   'game/createNewRoom',
-  async (data, { dispatch, getState }) => {
-    const { player, roomId } = data;
+  async (data, { getState }) => {
+    const { initialPlayer, roomId } = data;
 
     const { playfield } = getState();
     const { playerOnePos, playerTwoPos, playerOneWallsLeft, playerTwoWallsLeft, placed, winner, turn, isGameStarted } =
       playfield;
 
     if (!roomId) {
-      console.error('Room id is not provided');
+      logger.error('Room id is not provided');
       return;
     }
 
     const docRef = doc(db, 'rooms', roomId);
 
     await setDoc(docRef, {
-      initialPlayer: player,
+      initialPlayer,
       roomId,
       turn,
       isGameStarted,
@@ -84,10 +86,6 @@ export const createNewRoom = createAsyncThunk<void, { player: Player; roomId: st
       playerTwoPos,
       placed,
       winner,
-    });
-
-    onSnapshot(docRef, (doc) => {
-      dispatch(setData(doc.data()));
     });
   }
 );
@@ -99,7 +97,7 @@ export const restartGame = createAsyncThunk<void, void, { state: RootState }>(
     const { roomId } = playfield;
 
     if (!roomId) {
-      console.error('Room id is not provided');
+      logger.error('Room id is not provided');
       return;
     }
 
@@ -110,14 +108,14 @@ export const restartGame = createAsyncThunk<void, void, { state: RootState }>(
       const { initialPlayer } = docSnap.data() as FirebasePlayfieldState;
 
       if (!initialPlayer) {
-        console.error(`Initial player is ${initialPlayer}`);
+        logger.error(`Initial player is ${initialPlayer}`);
         return;
       }
 
       const cleanData = {
         initialPlayer: initialPlayer,
         roomId: roomId,
-        turn: 'One',
+        turn: PLAYERS.PLAYER_1,
         isGameStarted: true,
         playerOneWallsLeft: 10,
         playerTwoWallsLeft: 10,
@@ -141,26 +139,25 @@ export const move = createAsyncThunk<InitialPlayfieldState, Position, { state: R
     const { player, roomId, turn } = playfield;
 
     if (!roomId) {
-      // TODO handle all errors properly
-      console.error('Room id is not provided');
+      logger.error('Room id is not provided');
       return playfield;
     }
 
     const newState = cloneDeep(playfield);
 
-    if (player === 'One') {
+    if (player === PLAYERS.PLAYER_1) {
       newState.playerOnePos = data;
     } else {
       newState.playerTwoPos = data;
     }
 
-    if (data.row === 0 && player === 'One') newState.winner = 'One';
-    if (data.row === PLAYFIELD_SIZE && player === 'Two') newState.winner = 'Two';
+    if (data.row === 0 && player === PLAYERS.PLAYER_1) newState.winner = PLAYERS.PLAYER_1;
+    if (data.row === PLAYFIELD_SIZE && player === PLAYERS.PLAYER_2) newState.winner = PLAYERS.PLAYER_2;
 
-    if (turn === 'One') {
-      newState.turn = 'Two';
+    if (turn === PLAYERS.PLAYER_1) {
+      newState.turn = PLAYERS.PLAYER_2;
     } else {
-      newState.turn = 'One';
+      newState.turn = PLAYERS.PLAYER_1;
     }
 
     const docRef = doc(db, 'rooms', roomId);
@@ -183,23 +180,23 @@ export const place = createAsyncThunk<InitialPlayfieldState, Position[], { state
     const { placed, playerOneWallsLeft, playerTwoWallsLeft, turn, player, roomId } = playfield;
 
     if (!roomId) {
-      console.error('Room id is not provided');
+      logger.error('Room id is not provided');
       return playfield;
     }
 
     const newState = cloneDeep(playfield);
 
     newState.placed = [...placed, ...data];
-    if (player === 'One') {
+    if (player === PLAYERS.PLAYER_1) {
       newState.playerOneWallsLeft = playerOneWallsLeft - 1;
     } else {
       newState.playerTwoWallsLeft = playerTwoWallsLeft - 1;
     }
 
-    if (turn === 'One') {
-      newState.turn = 'Two';
+    if (turn === PLAYERS.PLAYER_1) {
+      newState.turn = PLAYERS.PLAYER_2;
     } else {
-      newState.turn = 'One';
+      newState.turn = PLAYERS.PLAYER_1;
     }
 
     const docRef = doc(db, 'rooms', roomId);
@@ -224,11 +221,6 @@ const playfieldSlice = createSlice({
     },
     setRoomId: (state, action) => {
       state.roomId = action.payload;
-    },
-    // TODO remove this
-    setInitialData: (state, action) => {
-      state.player = action.payload.player;
-      state.turn = action.payload.turn;
     },
     setData: (state, action) => {
       state.turn = action.payload.turn;
@@ -262,6 +254,6 @@ const playfieldSlice = createSlice({
   },
 });
 
-export const { selectPlayer, setInitialData, setRoomId, setData } = playfieldSlice.actions;
+export const { selectPlayer, setRoomId, setData } = playfieldSlice.actions;
 
 export default playfieldSlice.reducer;

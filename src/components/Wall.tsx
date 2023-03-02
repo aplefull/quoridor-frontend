@@ -39,10 +39,10 @@ export const Wall = memo(
     isHorizontalIntersection,
   }: TWallProps) => {
     const dispatch = useDispatch<AppDispatch>();
-    // TODO don't use redux for this
     const { placed, playerOnePos, playerTwoPos } = useSelector((state: RootState) => state.playfield);
 
-    const isLegalPlacement = isLegalWallPlacement(getWallCoords(position, type), placed);
+    const fullWallCoords = getWallCoords(position, type);
+    const isLegalPlacement = isLegalWallPlacement(fullWallCoords, placed);
 
     const handleMouseleave = () => {
       onHover([]);
@@ -50,23 +50,20 @@ export const Wall = memo(
 
     const handleMouseenter = () => {
       if (canPlace && isLegalPlacement) {
-        onHover(getWallCoords(position, type));
+        onHover(fullWallCoords);
       }
     };
 
     const handleClick = () => {
-      // TODO move to top of component
-      const newWallCoords = getWallCoords(position, type);
-
       if (!canPlace) return;
 
-      if (isBlockingPath(playerOnePos, playerTwoPos, newWallCoords, placed)) {
+      if (isBlockingPath(playerOnePos, playerTwoPos, fullWallCoords, placed)) {
         toast("You can't place a wall here!");
         return;
       }
 
       if (isLegalPlacement) {
-        dispatch(place(newWallCoords));
+        dispatch(place(fullWallCoords));
       }
     };
 

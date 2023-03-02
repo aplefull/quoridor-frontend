@@ -3,7 +3,9 @@ import { memo } from 'react';
 // COMPONENTS
 import { Cell, Wall, TCellProps, TWallProps } from '@components';
 // CONSTANTS
-import { ELEMENTS, TElements } from '@constants';
+import { ELEMENTS } from '@constants';
+// UTILS
+import { getWallSize } from '@utils';
 
 type TPlayfieldElementProps = Omit<TWallProps, 'width' | 'height'> &
   Omit<TCellProps, 'size'> & {
@@ -44,37 +46,6 @@ export const PlayfieldElement = memo(
         />
       );
     }
-
-    // TODO move to utils
-    const getWallSize = (
-      sizes: {
-        cellSize: number;
-        verticalWallWidth: number;
-        verticalWallHeight: number;
-        horizontalWallWidth: number;
-        horizontalWallHeight: number;
-      },
-      type: TElements
-    ) => {
-      if (type === ELEMENTS.VERTICAL_WALL) {
-        return {
-          width: sizes.verticalWallWidth,
-          height: sizes.verticalWallHeight,
-        };
-      }
-
-      if (type === ELEMENTS.HORIZONTAL_WALL) {
-        return {
-          width: sizes.horizontalWallWidth,
-          height: sizes.horizontalWallHeight,
-        };
-      }
-
-      return {
-        width: sizes.verticalWallWidth,
-        height: sizes.horizontalWallHeight,
-      };
-    };
 
     const { width, height } = getWallSize(sizes, type);
 

@@ -15,6 +15,18 @@ export const ELEMENTS = {
   INTERSECTION: 'intersection',
 } as const;
 
+export const MENU_STATES = {
+  INITIAL: 'INITIAL',
+  SELECT_PLAYER: 'SELECT_PLAYER',
+  JOIN_ROOM: 'JOIN_ROOM',
+  WAITING: 'WAITING',
+} as const;
+
+export const PLAYERS = {
+  PLAYER_1: 'One',
+  PLAYER_2: 'Two',
+} as const;
+
 export type TElements = typeof ELEMENTS[keyof typeof ELEMENTS];
 
 const FULL_ROW = [

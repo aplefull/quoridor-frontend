@@ -1,9 +1,13 @@
-@import '../variables';
+@import '@variables';
 
 .wrapper {
   min-height: 100vh;
   display: flex;
   justify-content: center;
+}
+
+.loader-wrapper {
+  margin: auto;
 }
 
 .container {
@@ -30,9 +34,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  border-radius: $border-radius-x-large;
-  box-shadow: rgba($color-black, 65%) 0 0 15px;
 
   p {
     font-size: 24px;
@@ -41,23 +42,18 @@
   }
 
   img {
-    width: 450px;
+    max-width: min(90vw, 400px);
+    max-height: 65vh;
     height: auto;
     margin: 20px 0;
   }
+}
 
-  button {
-    width: 100px;
-    height: 25px;
-    border-radius: $border-radius-large;
-    color: $color-white;
-    background-color: $color-darker-gray;
-    border: 1px solid rgba($color-white, 0.5);
-    cursor: pointer;
-    margin-top: 20px;
+.toast-body {
+  background-color: $color-toast;
+  user-select: none;
+}
 
-    &:hover {
-      background-color: lighten($color-darker-gray, 5%);
-    }
-  }
+.toast-progress-bar {
+  background: $color-light-gray;
 }

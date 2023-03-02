@@ -10,4 +10,9 @@ export default defineConfig({
       localsConvention: 'camelCaseOnly',
     },
   },
+  resolve: {
+    alias: {
+      '@variables': '/src/css/variables.scss',
+    },
+  },
 });

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -9,7 +9,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -17,13 +17,15 @@
     "jsx": "react-jsx",
     "paths": {
       "@components": ["./src/components/index.ts"],
+      "@main": ["./src/main.tsx"],
       "@pages": ["./src/pages/index.ts"],
       "@redux": ["./src/redux/index.ts"],
       "@constants": ["./src/constants/index.ts"],
       "@utils": ["./src/utils/index.ts"],
       "@hooks": ["./src/hooks/index.ts"],
       "@gifs/*": ["./src/assets/images/gif/*"],
-      "@styles/*": ["./src/css/*"]
+      "@styles/*": ["./src/css/*"],
+      "@variables": ["./src/css/variables.scss"]
     }
   },
   "include": ["src"]

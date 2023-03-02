@@ -5,7 +5,7 @@ import { filter, intersectionWith, isEqual, isEmpty, concat, some, sample } from
 // REDUX
 import { Player, Position } from '@redux';
 // CONSTANTS
-import { ELEMENTS, PLAYFIELD_INITIAL_STATE, PLAYFIELD_SIZE, gifs } from '@constants';
+import { ELEMENTS, PLAYFIELD_INITIAL_STATE, PLAYFIELD_SIZE, gifs, PLAYERS, TElements } from '@constants';
 
 const isBetween = (num: number, val1: number, val2: number) => {
   const min = Math.min(val1, val2);
@@ -47,8 +47,8 @@ export const isLegalMove = (
   currentPlayer: Player,
   walls: Position[]
 ) => {
-  const currentPlayerPosition = currentPlayer === 'One' ? playerOnePos : playerTwoPos;
-  const enemyPosition = currentPlayer === 'One' ? playerTwoPos : playerOnePos;
+  const currentPlayerPosition = currentPlayer === PLAYERS.PLAYER_1 ? playerOnePos : playerTwoPos;
+  const enemyPosition = currentPlayer === PLAYERS.PLAYER_1 ? playerTwoPos : playerOnePos;
 
   const rowDiff = Math.abs(desirablePos.row - currentPlayerPosition.row);
   const colDiff = Math.abs(desirablePos.col - currentPlayerPosition.col);
@@ -80,7 +80,7 @@ export const availableMoves = (currentPosition: Position, walls: Position[]) => 
   ];
 
   return possiblePositions.filter((position) => {
-    return isLegalMove(currentPosition, currentPosition, position, 'One', walls) && !isOutOfBounds(position);
+    return isLegalMove(currentPosition, currentPosition, position, PLAYERS.PLAYER_1, walls) && !isOutOfBounds(position);
   });
 };
 
@@ -90,8 +90,8 @@ export const availableMovesWithPlayer = (
   currentPlayer: Player,
   walls: Position[]
 ) => {
-  const currentPosition = currentPlayer === 'One' ? playerOnePos : playerTwoPos;
-  const enemyPosition = currentPlayer === 'One' ? playerTwoPos : playerOnePos;
+  const currentPosition = currentPlayer === PLAYERS.PLAYER_1 ? playerOnePos : playerTwoPos;
+  const enemyPosition = currentPlayer === PLAYERS.PLAYER_1 ? playerTwoPos : playerOnePos;
 
   const possiblePositions: Position[] = [
     { row: currentPosition.row - 2, col: currentPosition.col },
@@ -127,7 +127,7 @@ export const availableMovesWithPlayer = (
     } else {
       getFourAdjacentPositions(enemyPosition)
         .filter((pos) => {
-          return isLegalMove(enemyPosition, currentPosition, pos, 'One', walls);
+          return isLegalMove(enemyPosition, currentPosition, pos, PLAYERS.PLAYER_1, walls);
         })
         .forEach((pos) => {
           possiblePositions.push(pos);
@@ -167,8 +167,8 @@ export const isCurrentPlayerTurn = (turn: Player, currentPlayer: Player) => {
 };
 
 export const doesPlayerHaveWalls = (player: Player, playerOneWalls: number, playerTwoWalls: number) => {
-  if (player === 'One') return playerOneWalls > 0;
-  else return playerTwoWalls > 0;
+  if (player === PLAYERS.PLAYER_1) return playerOneWalls > 0;
+  return playerTwoWalls > 0;
 };
 
 export const getWallCoords = (desirablePos: Position, wallType: string): Position[] => {
@@ -198,6 +198,36 @@ export const getWallCoords = (desirablePos: Position, wallType: string): Positio
         ];
   }
   return [];
+};
+
+export const getWallSize = (
+  sizes: {
+    cellSize: number;
+    verticalWallWidth: number;
+    verticalWallHeight: number;
+    horizontalWallWidth: number;
+    horizontalWallHeight: number;
+  },
+  type: TElements
+) => {
+  if (type === ELEMENTS.VERTICAL_WALL) {
+    return {
+      width: sizes.verticalWallWidth,
+      height: sizes.verticalWallHeight,
+    };
+  }
+
+  if (type === ELEMENTS.HORIZONTAL_WALL) {
+    return {
+      width: sizes.horizontalWallWidth,
+      height: sizes.horizontalWallHeight,
+    };
+  }
+
+  return {
+    width: sizes.verticalWallWidth,
+    height: sizes.horizontalWallHeight,
+  };
 };
 
 export const isBlockingPath = (

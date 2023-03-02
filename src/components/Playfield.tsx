@@ -18,7 +18,7 @@ import { useWindowSize } from '@hooks';
 // COMPONENTS
 import { PlayfieldElement } from '@components';
 // CONSTANTS
-import { PLAYFIELD_INITIAL_STATE } from '@constants';
+import { PLAYERS, PLAYFIELD_INITIAL_STATE } from '@constants';
 // STYLES
 import styles from '@styles/components/playfield.module.scss';
 
@@ -84,7 +84,7 @@ export const Playfield = memo(() => {
   const placedAndHovered = hovered.concat(placed);
 
   return (
-    <div className={cx(styles.playfield, { [styles.upsideDown]: player === 'Two' })} style={style}>
+    <div className={cx(styles.playfield, { [styles.upsideDown]: player === PLAYERS.PLAYER_2 })} style={style}>
       {grid.map((el, i) => {
         const position = useMemo(() => getRowCol(i), [i]);
         const { row, col } = position;
