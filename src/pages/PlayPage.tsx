@@ -109,8 +109,8 @@ export const PlayPage = () => {
               autoClose={3000}
               limit={3}
               position="bottom-right"
-              toastClassName={styles.toastBody}
-              progressClassName={styles.toastProgressBar}
+              toastClassName="toast-body"
+              progressClassName="toast-progress-bar"
             />
           </div>
         </Await>

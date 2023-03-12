@@ -48,3 +48,12 @@ noscript {
   font-family: $font-family-apple;
   color: $color-text;
 }
+
+.toast-body {
+  background-color: $color-toast;
+  user-select: none;
+}
+
+.toast-progress-bar {
+  background: $color-light-gray;
+}
